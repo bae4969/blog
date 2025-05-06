@@ -83,7 +83,7 @@ $query_array["visitor_count_table_query"] =
 	;";
 
 $query_array["get_full_posting_and_increase_cnt_procedure_query"] = 
-	"CREATE DEFINER=`bae4969`@`135.135.135.%` PROCEDURE `get_full_posting_and_increase_cnt`(
+	"CREATE DEFINER=`bae4969`@`localhost` PROCEDURE `get_full_posting_and_increase_cnt`(
 		IN `input_user_level` TINYINT,
 		IN `input_user_index` INT,
 		IN `input_posting_index` INT,
