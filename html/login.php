@@ -9,13 +9,13 @@
 <body>
     <div id='main'>
         <header>
-            <div id=topLeft OnClick='location.href="index"'>
+            <div id=topLeft OnClick='location.href="index.php"'>
                 Home
             </div>
         </header>
         <div id='inputLayout'>
             <div class='title'>
-                <img id=mainTitle OnClick='location.href="index"' src="res/title.png" alt="Index Page" height="100%" />
+                <img id=mainTitle OnClick='location.href="index.php"' src="res/title.png" alt="Index Page" height="100%" />
             </div>
 
             <div class='input'>
@@ -55,7 +55,7 @@
                         if(user['state'] == 0){
                             setCookie("user_id", user_id, 1);
                             setCookie("user_pw", user_pw, 1);
-                            location.href = '/index';
+                            location.href = '/index.php';
                         }
                         else {
                             alert(user['etc']);

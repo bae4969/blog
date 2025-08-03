@@ -11,11 +11,11 @@
 <body>
     <div id="main">
         <header>
-            <div id=topLeft OnClick='location.href="/index"'>Home</div>
+            <div id=topLeft OnClick='location.href="/index.php"'>Home</div>
             <div id=topRight onclick=loginoutClick()></div>
             <div id=topWrite onclick=writePostingClick()></div>
             <div id=title>
-                <img id=mainTitle OnClick='location.href="index"' src="res/title.png" alt="Blog Page" />
+                <img id=mainTitle OnClick='location.href="index.php"' src="res/title.png" alt="Blog Page" />
             </div>
         </header>
         <section id=section>
@@ -55,7 +55,7 @@
                 posting_index = params['posting_index'];
             else {
                 alert('잘못된 접근')
-                location.href = '/index';
+                location.href = '/index.php';
             }
             
             verifyLogin();
@@ -69,14 +69,14 @@
                 deleteCookie('user_id');
                 deleteCookie('user_pw');
                 alert("로그아웃");
-                location.href = '/index';
+                location.href = '/index.php';
             } else {
-                location.href = '/login';
+                location.href = '/login.php';
             }
         }
 
         function writePostingClick() {
-            location.href = "/writer?category_index=" + category_index;
+            location.href = "/writer.php?category_index=" + category_index;
         }
 
         function verifyLogin() {
@@ -156,7 +156,7 @@
                     category_li.value = category_list['data'][i]['category_index']
                     category_li.innerHTML = category_list['data'][i]['category_name'];
                     category_li.onclick = function() {
-                        location.href = 'index?category_index=' + this.value;
+                        location.href = 'index.php?category_index=' + this.value;
                     }
 
                     var option = document.createElement('option');
@@ -186,7 +186,7 @@
                 var full_posting = JSON.parse(this.responseText);
                 if (full_posting['state'] != 0) {
                     alert('Return Error (' + full_posting['state'] + ')');
-                    location.href = 'index';
+                    location.href = 'index.php';
                     return;
                 }
 
@@ -282,13 +282,13 @@
                 alert("검색 문자는 최소 2자 이상이어야 합니다.")
             else
                 location.href =
-                "/index" +
+                "/index.php" +
                 "?category_index=" + document.getElementById("search_category_list").value +
                 "&search_string=" + encodeURI(encodeURIComponent(t_search_str));
         }
 
         function editClick() {
-            location.href = 'writer?posting_index=' + posting_index;
+            location.href = 'writer.php?posting_index=' + posting_index;
         }
 
         function enableClick() {
@@ -315,7 +315,7 @@
 
 
                 alert('복구 되었습니다.');
-                location.href = 'reader?posting_index=' + posting_index;
+                location.href = 'reader.php?posting_index=' + posting_index;
             }
             xhr.send(formData);
         }
@@ -344,7 +344,7 @@
 
 
                 alert('삭제 되었습니다.');
-                location.href = 'reader?posting_index=' + posting_index;
+                location.href = 'reader.php?posting_index=' + posting_index;
             }
             xhr.send(formData);
         }

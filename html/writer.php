@@ -9,11 +9,11 @@
 <body>
     <div id="main">
         <header>
-            <div id=topLeft OnClick='location.href="/index"'>Home</div>
+            <div id=topLeft OnClick='location.href="/index.php"'>Home</div>
             <div id=topRight onclick=loginoutClick()></div>
             <div id=topWrite onclick=writePostingClick()></div>
             <div id=title>
-                <img id=mainTitle OnClick='location.href="index"' src="res/title.png" alt="Blog Page" />
+                <img id=mainTitle OnClick='location.href="index.php"' src="res/title.png" alt="Blog Page" />
             </div>
         </header>
         <section>
@@ -60,14 +60,14 @@
                 deleteCookie('user_id');
                 deleteCookie('user_pw');
                 alert("로그아웃");
-                location.href = 'index';
+                location.href = 'index.php';
             }
             else {
-                location.href = '/login';
+                location.href = '/login.php';
             }
         }
         function writePostingClick(){
-            location.href="/writer?category_index=" + category_index;
+            location.href="/writer.php?category_index=" + category_index;
         }
 
         function verifyLogin() {
@@ -86,7 +86,7 @@
                 user_info_row = JSON.parse(this.responseText);
                 if(user_info_row['can_write'] == 0) {
                     alert('글쓰기 횟수가 초과 되었습니다.');
-                    location.href = 'index';
+                    location.href = 'index.php';
                     return;
                 }
                 if (user_info_row['state'] == 0) {
@@ -153,7 +153,7 @@
                 var full_posting = JSON.parse(this.responseText);
                 if(full_posting['state'] != 0){
                     alert('포스팅 초기화 오류 (' + full_posting['state'] + ')');
-                    location.href = 'reader?posting_index=' + posting_index;
+                    location.href = 'reader.php?posting_index=' + posting_index;
                     return;
                 }
                 
@@ -269,7 +269,7 @@
                 
                 var result = JSON.parse(this.responseText);
                 if(result['state'] == 0)
-                    location.href = 'reader?posting_index=' + result['posting_index'];
+                    location.href = 'reader.php?posting_index=' + result['posting_index'];
                 else 
                     alert('포스팅 실패 (' + result['etc'] + ')');
             }

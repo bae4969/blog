@@ -19,7 +19,7 @@
 
     <script type="text/javascript">
         window.onload = function() {
-            location.href = 'index';
+            location.href = 'index.php';
         }
     </script>
 </body>
