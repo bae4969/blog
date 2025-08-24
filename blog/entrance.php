@@ -19,7 +19,7 @@
 
     <script type="text/javascript">
         window.onload = function() {
-            location.href = 'index.php';
+            location.href = 'https://baenoipddnsaddress.ddns.net:40000/index.php';
         }
     </script>
 </body>
