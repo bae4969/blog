@@ -41,10 +41,11 @@ header { width: 100%; }
 /* 섹션/사이드바/본문 */
 section { padding: 10px; border-radius: 20px; background: #1A1C1D; }
 aside { width: 220px; float: right; }
-#content { width: calc(100% - 220px); float: left; margin-top: 10px; }
+.content-alert-container { width: 100%; }
+#content { width: calc(100% - 220px); float: left; }
 
 #profile, #category, #search_posting_div, #user_count {
-	margin: 10px 10px 20px 10px; padding: 15px; border-radius: 20px; background: #222426; display: block;
+	margin: 10px 10px 20px 10px; padding: 20px; border-radius: 20px; background: #222426; display: block;
 }
 #category { list-style: none; }
 li.category { padding: 15px; font-size: 2.3ex; font-weight: bold; cursor: pointer; transition: background-color .2s ease, color .2s ease, box-shadow .2s ease; border-radius: 8px; }
@@ -72,13 +73,14 @@ button.page, .page-link { width: 35px; height: 30px; margin: 0 2px; color: #fff;
 #selectedPage, .page-link.active { background: #36383A; }
 
 /* 알림 */
-.alert { padding: 1rem; border-radius: 4px; margin-bottom: 1rem; }
+.alert { padding: 1rem; border-radius: 10px; margin-bottom: 1rem; margin: 10px; }
 .alert-success { background: #2d4a2d; color: #4CAF50; border: 1px solid #4CAF50; }
 .alert-error { background: #4a2d2d; color: #f44336; border: 1px solid #f44336; }
 
 /* 로그인 전용 중앙 정렬 */
 .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .auth-card { width: 100%; max-width: 520px; }
+.auth-alert-container { width: 110%; }
 #inputLayout { width: 100%; margin: 0 auto; padding: 28px; background: #222426; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
 #inputLayout .title { text-align: center; margin-bottom: 24px; }
 #inputLayout #mainTitle { width: 320px; max-width: 100%; height: auto; }

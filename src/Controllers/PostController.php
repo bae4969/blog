@@ -17,7 +17,7 @@ class PostController extends BaseController
         $this->categoryModel = new Category();
     }
 
-    public function show(int $postId = null): void
+    public function show(?int $postId = null): void
     {
         // 쿼리스트링 fallback 처리
         if ($postId === null) {
@@ -29,8 +29,9 @@ class PostController extends BaseController
             return;
         }
 
-        $post = $this->postModel->getById($postId);
-        
+        $userLevel = $this->auth->getCurrentUserLevel();
+        $post = $this->postModel->getById($userLevel, $postId);
+
         if (!$post) {
             $this->session->setFlash('error', '게시글을 찾을 수 없습니다.');
             $this->redirect('/index.php');
@@ -39,7 +40,7 @@ class PostController extends BaseController
         // 조회수 증가
         $this->postModel->incrementReadCount($postId);
 
-        $categories = $this->categoryModel->getAll();
+        $categories = $this->categoryModel->getAll($userLevel);
         
         $this->renderLayout('main', 'posts/show', [
             'post' => $post,
@@ -53,7 +54,9 @@ class PostController extends BaseController
         $this->auth->requireWritePermission();
         
         $categoryId = (int)$this->getParam('category_index', -1);
-        $categories = $this->categoryModel->getAll();
+        $userLevel = $this->auth->getCurrentUserLevel();
+        
+        $categories = $this->categoryModel->getAll($userLevel);
         
         $this->renderLayout('main', 'posts/create', [
             'categories' => $categories,
@@ -126,7 +129,8 @@ class PostController extends BaseController
             return;
         }
         
-        $post = $this->postModel->getById($postId);
+        $userLevel = $this->auth->getCurrentUserLevel();
+        $post = $this->postModel->getById($userLevel, $postId);
         
         if (!$post) {
             $this->session->setFlash('error', '게시글을 찾을 수 없습니다.');
@@ -139,7 +143,7 @@ class PostController extends BaseController
             $this->redirect('/index.php');
         }
 
-        $categories = $this->categoryModel->getAll();
+        $categories = $this->categoryModel->getAll($userLevel);
         
         $this->renderLayout('main', 'posts/edit', [
             'post' => $post,
@@ -161,7 +165,8 @@ class PostController extends BaseController
             $this->redirect("/post/edit/{$postId}");
         }
 
-        $post = $this->postModel->getById($postId);
+        $userLevel = $this->auth->getCurrentUserLevel();
+        $post = $this->postModel->getById($userLevel, $postId);
         
         if (!$post) {
             $this->session->setFlash('error', '게시글을 찾을 수 없습니다.');
@@ -222,7 +227,8 @@ class PostController extends BaseController
             $this->redirect('/index.php');
         }
 
-        $post = $this->postModel->getById($postId);
+        $read_level = $this->auth->getCurrentUserLevel();
+        $post = $this->postModel->getById($read_level, $postId);
         
         if (!$post) {
             $this->session->setFlash('error', '게시글을 찾을 수 없습니다.');

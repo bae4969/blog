@@ -18,8 +18,10 @@ class Auth
     public function login(string $userId, string $password): bool
     {
         $user = $this->userModel->authenticate($userId, $password);
-        
+
         if ($user) {
+            if ($user['user_state'] > 0)
+                return false;
             $this->session->regenerate();
             $this->session->set('user_index', $user['user_index']);
             $this->session->set('user_id', $user['user_id']);
@@ -27,7 +29,7 @@ class Auth
             $this->session->set('user_state', $user['user_state']);
             return true;
         }
-        
+
         return false;
     }
 
@@ -66,6 +68,16 @@ class Auth
         return $this->session->get('user_id');
     }
 
+    public function getCurrentUserLevel(): ?int
+    {
+        return $this->session->get('user_level') ?? 4;
+    }
+
+    public function getCurrentUserState(): ?int
+    {
+        return $this->session->get('user_state');
+    }
+
     public function canWrite(): bool
     {
         if (!$this->isLoggedIn()) {
@@ -87,7 +99,7 @@ class Auth
     public function requireWritePermission(): void
     {
         $this->requireLogin();
-        
+
         if (!$this->canWrite()) {
             $this->session->setFlash('error', '글쓰기 횟수가 초과되었습니다.');
             header('Location: /index.php');

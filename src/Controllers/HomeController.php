@@ -25,16 +25,17 @@ class HomeController extends BaseController
         $page = (int)$this->getParam('page', 1);
         $categoryId = (int)$this->getParam('category_index', -1);
         $search = $this->getParam('search_string', '');
+        $userLevel = $this->auth->getCurrentUserLevel();
         
         // 카테고리 ID가 -1이면 null로 설정
         $categoryId = $categoryId > 0 ? $categoryId : null;
         
         // 방문자 수 업데이트
-        $this->userModel->updateVisitorCount();
+        $this->userModel->updateVisitorCount($userLevel);
         
         // 데이터 조회
-        $posts = $this->postModel->getAll($page, 10, $categoryId, $search);
-        $categories = $this->categoryModel->getAll();
+        $posts = $this->postModel->getAll($userLevel, $page, 10, $categoryId, $search);
+        $categories = $this->categoryModel->getAll($userLevel);
         $totalCount = $this->postModel->getTotalCount($categoryId, $search);
         $visitorCount = $this->userModel->getVisitorCount();
         
@@ -59,10 +60,11 @@ class HomeController extends BaseController
     {
         $categoryId = (int)$this->getParam('category_index', -1);
         $search = $this->getParam('search_string', '');
+        $userLevel = $this->auth->getCurrentUserLevel();
         
         $categoryId = $categoryId > 0 ? $categoryId : null;
         
-        $posts = $this->postModel->getAll(1, 10, $categoryId, $search);
+        $posts = $this->postModel->getAll($userLevel, 1, 10, $categoryId, $search);
         $totalCount = $this->postModel->getTotalCount($categoryId, $search);
         
         $this->json([

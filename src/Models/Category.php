@@ -13,10 +13,10 @@ class Category
         $this->db = Database::getInstance();
     }
 
-    public function getAll(): array
+    public function getAll(int $read_level): array
     {
-        $sql = "SELECT * FROM category_list ORDER BY category_order ASC";
-        return $this->db->fetchAll($sql);
+        $sql = "SELECT * FROM category_list WHERE category_read_level >= ? ORDER BY category_order ASC";
+        return $this->db->fetchAll($sql, [$read_level]);
     }
 
     public function getById(int $categoryId): ?array

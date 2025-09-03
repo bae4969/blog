@@ -13,7 +13,7 @@ class Post
         $this->db = Database::getInstance();
     }
 
-    public function getAll(int $page = 1, int $perPage = 10, ?int $categoryId = null, ?string $search = null): array
+    public function getAll(int $read_level, int $page = 1, int $perPage = 10, ?int $categoryId = null, ?string $search = null): array
     {
         $offset = ($page - 1) * $perPage;
         $whereConditions = [];
@@ -21,12 +21,16 @@ class Post
 
         if ($categoryId !== null && $categoryId > 0) {
             $whereConditions[] = "P.category_index = ?";
+            $whereConditions[] = "C.category_read_level >= ?";
             $params[] = $categoryId;
+            $params[] = $read_level;
         }
 
         if ($search) {
             $whereConditions[] = "P.posting_title LIKE ?";
+            $whereConditions[] = "C.category_read_level >= ?";
             $params[] = "%{$search}%";
+            $params[] = $read_level;
         }
 
         $whereClause = !empty($whereConditions) ? "WHERE " . implode(" AND ", $whereConditions) : "";
@@ -45,15 +49,20 @@ class Post
         return $this->db->fetchAll($sql, $params);
     }
 
-    public function getById(int $postId): ?array
+    public function getById(int $read_level, int $postId): ?array
     {
+
         $sql = "SELECT P.*, C.category_name, U.user_id as user_name 
                 FROM posting_list P 
                 LEFT JOIN category_list C ON P.category_index = C.category_index 
                 LEFT JOIN user_list U ON P.user_index = U.user_index 
-                WHERE P.posting_index = ?";
+                WHERE C.category_read_level >= ? AND P.posting_index = ?" ;
+                
+        $params = [];
+        $params[] = $read_level;
+        $params[] = $postId;
         
-        return $this->db->fetch($sql, [$postId]);
+        return $this->db->fetch($sql, $params);
     }
 
     public function create(array $data): int

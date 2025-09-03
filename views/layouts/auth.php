@@ -14,17 +14,19 @@
 <body>
 	<div class="auth-wrapper">
 		<div class="auth-card">
-			<?php if ($session->hasFlash('success')): ?>
-				<div class="alert alert-success">
-					<?= $view->escape($session->getFlash('success')) ?>
-				</div>
-			<?php endif; ?>
+			<div class="auth-alert-container">
+				<?php if ($session->hasFlash('success')): ?>
+					<div class="alert alert-success">
+						<?= $view->escape($session->getFlash('success')) ?>
+					</div>
+				<?php endif; ?>
 
-			<?php if ($session->hasFlash('error')): ?>
-				<div class="alert alert-error">
-					<?= $view->escape($session->getFlash('error')) ?>
-				</div>
-			<?php endif; ?>
+				<?php if ($session->hasFlash('error')): ?>
+					<div class="alert alert-error">
+						<?= $view->escape($session->getFlash('error')) ?>
+					</div>
+				<?php endif; ?>
+			</div>
 
 			<?= $content ?>
 		</div>

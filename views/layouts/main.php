@@ -30,9 +30,9 @@
             <aside>
                 <div id="profile">
                     <?php if ($auth->isLoggedIn()): ?>
-                        <p>안녕하세요, <?= $view->escape($auth->getCurrentUserName()) ?>님!</p>
+                        안녕하세요, <?= $view->escape($auth->getCurrentUserName()) ?>님!
                     <?php else: ?>
-                        <p>로그인해주세요</p>
+                        로그인해주세요
                     <?php endif; ?>
                 </div>
                 <div id="user_count">방문자: <?= number_format($visitorCount ?? 0) ?></div>
@@ -64,17 +64,19 @@
             </aside>
             
             <div id="content">
-                <?php if ($session->hasFlash('success')): ?>
-                    <div class="alert alert-success">
-                        <?= $view->escape($session->getFlash('success')) ?>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if ($session->hasFlash('error')): ?>
-                    <div class="alert alert-error">
-                        <?= $view->escape($session->getFlash('error')) ?>
-                    </div>
-                <?php endif; ?>
+			    <div class="content-alert-container">
+                    <?php if ($session->hasFlash('success')): ?>
+                        <div class="alert alert-success">
+                            <?= $view->escape($session->getFlash('success')) ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($session->hasFlash('error')): ?>
+                        <div class="alert alert-error">
+                            <?= $view->escape($session->getFlash('error')) ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
                 
                 <?= $content ?>
             </div>
