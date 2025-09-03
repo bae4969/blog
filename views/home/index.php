@@ -1,0 +1,88 @@
+<div id="postings">
+    <div>
+        <div id="left">
+            <?php if (empty($posts)): ?>
+                <div class="no-posts">
+                    <p>게시글이 없습니다.</p>
+                </div>
+            <?php else: ?>
+                <?php foreach ($posts as $post): ?>
+                    <div class="posting" onclick="location.href='/reader.php?posting_index=<?= $post['posting_index'] ?>'">
+                        <div class="posting_title">
+                            <?= $view->escape($post['posting_title']) ?>
+                        </div>
+                        <div class="posting_writer">
+                            작성자: <?= $view->escape($post['user_name'] ?? '익명') ?>
+                        </div>
+                        <div class="posting_date">
+                            <?= date('Y-m-d H:i', strtotime($post['posting_first_post_datetime'])) ?>
+                        </div>
+                        <hr>
+                        <div class="posting_thumbnail_container">
+                            <?php if (!empty($post['posting_thumbnail'])): ?>
+                                <img class="posting_thumbnail" src="<?= $view->escape($post['posting_thumbnail']) ?>" alt="썸네일">
+                            <?php endif; ?>
+                        </div>
+                        <div class="posting_summary">
+                            <?= $view->escape(substr(strip_tags($post['posting_summary']), 0, 200)) ?>...
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+        <div id="right"></div>
+    </div>
+    
+    <?php if ($totalPages > 1): ?>
+        <div id="pages">
+            <?php if ($currentPage > 1): ?>
+                <button class="page" onclick="location.href='?page=<?= $currentPage - 1 ?><?= $currentCategory ? '&category_index=' . $currentCategory : '' ?><?= $search ? '&search_string=' . urlencode($search) : '' ?>'">&lt;</button>
+            <?php endif; ?>
+            
+            <?php for ($i = max(1, $currentPage - 2); $i <= min($totalPages, $currentPage + 2); $i++): ?>
+                <button class="page <?= $i === $currentPage ? 'selectedPage' : '' ?>" 
+                        onclick="location.href='?page=<?= $i ?><?= $currentCategory ? '&category_index=' . $currentCategory : '' ?><?= $search ? '&search_string=' . urlencode($search) : '' ?>'">
+                    <?= $i ?>
+                </button>
+            <?php endfor; ?>
+            
+            <?php if ($currentPage < $totalPages): ?>
+                <button class="page" onclick="location.href='?page=<?= $currentPage + 1 ?><?= $currentCategory ? '&category_index=' . $currentCategory : '' ?><?= $search ? '&search_string=' . urlencode($search) : '' ?>'">&gt;</button>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+    
+    <div id="temp"></div>
+</div>
+
+<script>
+function loginoutClick() {
+    <?php if ($auth->isLoggedIn()): ?>
+        if (confirm('로그아웃하시겠습니까?')) {
+            location.href = '/logout.php';
+        }
+    <?php else: ?>
+        location.href = '/login.php';
+    <?php endif; ?>
+}
+
+function writePostingClick() {
+    location.href = '/writer.php<?= $currentCategory ? '?category_index=' . $currentCategory : '' ?>';
+}
+
+function searchPostingClick() {
+    const categorySelect = document.getElementById('search_category_list');
+    const searchText = document.getElementById('search_posting_text').value;
+    const categoryIndex = categorySelect.value;
+    
+    let url = '/index.php?';
+    if (categoryIndex !== '-1') {
+        url += 'category_index=' + categoryIndex + '&';
+    }
+    if (searchText.trim()) {
+        url += 'search_string=' + encodeURIComponent(searchText.trim());
+    }
+    
+    location.href = url;
+}
+</script>
