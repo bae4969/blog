@@ -27,7 +27,7 @@
         </header>
         
         <section>
-            <aside>
+            <aside id="side-panel">
                 <div id="profile">
                     <?php if ($auth->isLoggedIn()): ?>
                         안녕하세요, <?= $view->escape($auth->getCurrentUserName()) ?>님!

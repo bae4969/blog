@@ -1,11 +1,11 @@
 <div id="postings">
     <div>
-        <div id="left">
-            <?php if (empty($posts)): ?>
-                <div class="no-posts">
-                    <p>게시글이 없습니다.</p>
-                </div>
-            <?php else: ?>
+        <?php if (empty($posts)): ?>
+            <div class="no-posts">
+                <p>게시글이 없습니다.</p>
+            </div>
+        <?php else: ?>
+            <div id="left">
                 <?php foreach ($posts as $post): ?>
                     <div class="posting" onclick="location.href='/reader.php?posting_index=<?= $post['posting_index'] ?>'">
                         <div class="posting_title">
@@ -28,9 +28,9 @@
                         </div>
                     </div>
                 <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-        <div id="right"></div>
+            </div>
+            <div id="right"></div>
+        <?php endif; ?>
     </div>
     
     <?php if ($totalPages > 1): ?>
