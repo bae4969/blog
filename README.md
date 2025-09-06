@@ -51,24 +51,40 @@ blog/
 │   ├── js/               # JavaScript
 │   └── res/              # 리소스 파일들
 ├── composer.json         # Composer 설정
+├── package.json          # npm 설정 (프론트엔드 의존성)
 └── README.md            # 프로젝트 문서
 ```
 
 ## 설치 및 실행
 
-### 1. 의존성 설치
+### 1. 백엔드 의존성 설치
 ```bash
 composer install
 ```
 
-### 2. 데이터베이스 설정
+### 2. 프론트엔드 의존성 설치 (선택사항)
+프론트엔드 라이브러리를 npm으로 관리하려면:
+```bash
+npm install
+```
+
+또는 로컬 파일로 사용하려면:
+```bash
+# Quill.js 로컬 파일 다운로드 (이미 다운로드됨)
+mkdir -p public/vendor/quill
+cd public/vendor/quill
+wget https://cdn.quilljs.com/1.3.6/quill.min.js
+wget https://cdn.quilljs.com/1.3.6/quill.snow.css
+```
+
+### 3. 데이터베이스 설정
 `config/database.php` 파일에서 데이터베이스 연결 정보를 수정하세요.
 
-### 3. 웹 서버 설정
+### 4. 웹 서버 설정
 Apache의 DocumentRoot를 `public/` 디렉토리로 설정하거나, 
 Nginx를 사용하는 경우 `public/` 디렉토리를 서빙하도록 설정하세요.
 
-### 4. 권한 설정
+### 5. 권한 설정
 ```bash
 chmod -R 755 public/
 chmod -R 644 config/
@@ -97,8 +113,8 @@ chmod -R 644 config/
 - **Backend**: PHP 7.4+
 - **Database**: MySQL
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Editor**: SmartEditor2
-- **Package Manager**: Composer
+- **Editor**: Quill.js (리치 텍스트 에디터)
+- **Package Manager**: Composer (백엔드), npm (프론트엔드, 선택사항)
 
 ## 보안 고려사항
 
@@ -114,6 +130,32 @@ chmod -R 644 config/
 2. **캐싱**: 세션 및 쿼리 캐싱
 3. **압축**: CSS/JS 압축
 4. **CDN**: 정적 리소스 CDN 사용 권장
+
+## 프론트엔드 의존성 관리
+
+### npm 사용 (권장)
+```bash
+# 의존성 설치
+npm install
+
+# Quill.js 업데이트
+npm update quill
+
+# 새로운 프론트엔드 라이브러리 추가
+npm install [라이브러리명]
+```
+
+### 로컬 파일 사용
+현재 프로젝트는 Quill.js를 로컬 파일로 사용하고 있습니다:
+- `public/vendor/quill/quill.min.js` - Quill.js 라이브러리
+- `public/vendor/quill/quill.snow.css` - Quill.js 스타일
+
+새로운 버전으로 업데이트하려면:
+```bash
+cd public/vendor/quill
+wget https://cdn.quilljs.com/[버전]/quill.min.js
+wget https://cdn.quilljs.com/[버전]/quill.snow.css
+```
 
 ## 개발 가이드
 

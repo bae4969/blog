@@ -20,12 +20,15 @@ class PostController extends BaseController
         $this->userModel = new User();
     }
 
-    public function show(?int $postId = null): void
+    public function show($postId = null): void
     {
         // 쿼리스트링 fallback 처리
         if ($postId === null) {
             $postId = (int)$this->getParam('posting_index', -1);
+        } else {
+            $postId = (int)$postId;
         }
+        
         if ($postId <= 0) {
             $this->session->setFlash('error', '잘못된 접근입니다.');
             $this->redirect('/index.php');
@@ -167,12 +170,15 @@ class PostController extends BaseController
         }
     }
 
-    public function editForm(?int $postId = null): void
+    public function editForm($postId = null): void
     {
         $this->auth->requireLogin();
 
+        // URL 파라미터에서 postId 가져오기 (문자열로 전달되므로 int로 변환)
         if ($postId === null) {
             $postId = (int)$this->getParam('posting_index', -1);
+        } else {
+            $postId = (int)$postId;
         }
         if ($postId <= 0) {
             $this->session->setFlash('error', '잘못된 접근입니다.');
@@ -204,9 +210,12 @@ class PostController extends BaseController
         ]);
     }
 
-    public function update(int $postId): void
+    public function update($postId): void
     {
         $this->auth->requireLogin();
+        
+        // URL 파라미터를 int로 변환
+        $postId = (int)$postId;
 
         if (!$this->isPost()) {
             $this->redirect("/post/edit/{$postId}");
@@ -275,9 +284,12 @@ class PostController extends BaseController
         }
     }
 
-    public function enable(int $postId): void
+    public function enable($postId): void
     {
         $this->auth->requireLogin();
+        
+        // URL 파라미터를 int로 변환
+        $postId = (int)$postId;
 
         if (!$this->isPost()) {
             $this->redirect('/index.php');
@@ -312,9 +324,12 @@ class PostController extends BaseController
         $this->redirect('/index.php');
     }
 
-    public function disable(int $postId): void
+    public function disable($postId): void
     {
         $this->auth->requireLogin();
+        
+        // URL 파라미터를 int로 변환
+        $postId = (int)$postId;
 
         if (!$this->isPost()) {
             $this->redirect('/index.php');
