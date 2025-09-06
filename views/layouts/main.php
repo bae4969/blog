@@ -28,25 +28,27 @@
         
         <section>
             <aside id="side-panel">
-                <div id="profile">
-                    <?php if ($auth->isLoggedIn()): ?>
-                        안녕하세요, <?= $view->escape($auth->getCurrentUserName()) ?>님!
-                    <?php else: ?>
-                        로그인해주세요
-                    <?php endif; ?>
-                </div>
-                <div id="user_count">방문자: <?= number_format($visitorCount ?? 0) ?></div>
-                <ul id="category">
-                    <li class="category <?= (!isset($currentCategory) || $currentCategory === null) ? 'category-selected' : '' ?>" onclick="selectCategory(-1)">전체</li>
-                    <?php if (isset($categories)): ?>
-                        <?php foreach ($categories as $category): ?>
-                            <li class="category <?= (isset($currentCategory) && $currentCategory == $category['category_index']) ? 'category-selected' : '' ?>" onclick="selectCategory(<?= $category['category_index'] ?>)">
-                                <?= $view->escape($category['category_name']) ?>
-                            </li>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </ul>
-                <div id="search_posting_div">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">메뉴</button>
+                <div class="sidebar-content">
+                    <div id="profile">
+                        <?php if ($auth->isLoggedIn()): ?>
+                            안녕하세요, <?= $view->escape($auth->getCurrentUserName()) ?>님!
+                        <?php else: ?>
+                            로그인해주세요
+                        <?php endif; ?>
+                    </div>
+                    <div id="user_count">방문자: <?= number_format($visitorCount ?? 0) ?></div>
+                    <ul id="category">
+                        <li class="category <?= (!isset($currentCategory) || $currentCategory === null) ? 'category-selected' : '' ?>" onclick="selectCategory(-1)">전체</li>
+                        <?php if (isset($categories)): ?>
+                            <?php foreach ($categories as $category): ?>
+                                <li class="category <?= (isset($currentCategory) && $currentCategory == $category['category_index']) ? 'category-selected' : '' ?>" onclick="selectCategory(<?= $category['category_index'] ?>)">
+                                    <?= $view->escape($category['category_name']) ?>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </ul>
+                    <div id="search_posting_div">
                     <div class="search-container">
                         <div class="search-input-group">
                             <input id="search_posting_text" type="text" placeholder="검색..." 
@@ -71,6 +73,7 @@
                             </select>
                         </div>
                     </div>
+                </div>
                 </div>
             </aside>
             
@@ -111,6 +114,33 @@
         
         location.href = '/writer.php';
     }
+    
+    // 사이드 패널 토글 함수
+    function toggleSidebar() {
+        const sidebarContent = document.querySelector('.sidebar-content');
+        const toggleButton = document.querySelector('.sidebar-toggle');
+        
+        if (sidebarContent.classList.contains('expanded')) {
+            sidebarContent.classList.remove('expanded');
+            toggleButton.classList.add('collapsed');
+        } else {
+            sidebarContent.classList.add('expanded');
+            toggleButton.classList.remove('collapsed');
+        }
+    }
+    
+    // 모바일에서 페이지 로드 시 사이드 패널 접기
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.innerWidth <= 1024) {
+            const sidebarContent = document.querySelector('.sidebar-content');
+            const toggleButton = document.querySelector('.sidebar-toggle');
+            
+            if (sidebarContent && toggleButton) {
+                // CSS에서 이미 접힌 상태로 설정되어 있으므로 추가 작업 불필요
+                toggleButton.classList.add('collapsed');
+            }
+        }
+    });
     </script>
     <?php if (isset($additionalJs)): ?>
         <?php foreach ($additionalJs as $js): ?>

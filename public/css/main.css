@@ -1,4 +1,8 @@
 /* 기본 다크 테마 레이아웃 */
+* {
+	box-sizing: border-box;
+}
+
 header::after, nav::after, aside::after, div::after, section::after, li::after, select::after {
 	content: "";
 	display: table;
@@ -7,13 +11,14 @@ header::after, nav::after, aside::after, div::after, section::after, li::after, 
 }
 
 body {
-	min-width: 800px;
+	min-width: 400px;
 	margin: 0;
 	padding: 0;
 	background: #181A1B;
 	color: #C3C3C3;
 	list-style: none;
 	font-family: "arial";
+	box-sizing: border-box;
 }
 
 #main {
@@ -22,6 +27,7 @@ body {
 	margin: 0 auto;
 	padding: 20px 10px;
 	padding-top: 10px;
+	box-sizing: border-box;
 }
 
 /* 헤더 */
@@ -32,7 +38,7 @@ header { width: 100%; }
 #topRight { width: 70px; margin-right: 7%; float: right; font-size: 1.8ex; }
 #topWrite { width: 70px; float: right; font-size: 1.8ex; }
 #title { width: 100%; padding-top: 100px; padding-bottom: 70px; text-align: center; }
-#mainTitle { width: 700px; cursor: pointer; }
+#mainTitle { width: 70%; max-width: 700px; cursor: pointer; }
 
 /* 섹션/사이드바/본문 */
 section { padding: 10px; border-radius: 20px; background: #1A1C1D; }
@@ -71,8 +77,6 @@ li.category-selected::before {
     color: #4CAF50;
     opacity: 0.8;
 }
-
-/* 기존 검색 스타일 제거됨 - 새로운 모던 스타일로 대체 */
 
 /* 새로운 모던 검색 UI 스타일 - 사이드바 최적화 (버튼 레이아웃 수정) */
 .search-container {
@@ -282,6 +286,21 @@ li.category-selected::before {
 }
 
 /* 반응형 검색 UI - 사이드바 최적화 (버튼 레이아웃 수정) */
+@media (max-width: 1024px) and (min-width: 769px) {
+    /* 태블릿 크기 최적화 */
+    #side-panel {
+        width: 200px;
+    }
+    
+    #content {
+        width: calc(100% - 200px);
+    }
+    
+    .search-container {
+        gap: 6px;
+    }
+}
+
 @media (max-width: 768px) {
     .search-container {
         gap: 4px;
@@ -353,7 +372,7 @@ li.category-selected::before {
 #postings { width: 100%; margin-top: 10px; }
 #left { width: 50%; float: left; }
 #right { width: 50%; float: right; }
-.post-item, .posting, .posting_ban { width: calc(100% - 60px); margin: 0 10px 20px 10px; padding: 20px; display: inline-block; border-radius: 20px; color: #fff; background: #222426; }
+.post-item, .posting, .posting_ban { width: calc(100% - 20px); margin: 0 10px 20px 10px; padding: 20px; display: inline-block; border-radius: 20px; color: #fff; background: #222426; }
 .posting_ban { background: #3D202D; }
 .posting-disabled { background: #4a2d2d; opacity: 0.8; }
 .posting_title, .post-title { padding: 30px 8% 20px 8%; font-size: 4ex; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -589,38 +608,170 @@ footer a:hover { text-decoration: underline; color: #FF2E2E; }
 .btn-enable { background:#3a5a8a; color:#fff; border-color:#29406b; margin-right: 0; }
 .btn-enable:hover { background:#30407a; border-color:#24245e; }
 
-@media (max-width: 768px) {
-	section { padding: 10px; }
-	aside { width: 100%; float: none; border-bottom: 1px solid #36383A; }
-	#content { width: 100%; float: none; }
+@media (max-width: 1024px) {
+	#main {
+		padding: 20px 10px;
+		padding-top: 10px;
+	}
+	
+	section { 
+		padding: 10px; 
+		display: flex;
+		flex-direction: column;
+	}
+	
+	#side-panel { 
+		width: 100%; 
+		float: none; 
+		order: 1;
+		margin-bottom: 20px;
+		border-bottom: 1px solid #36383A;
+		padding-bottom: 20px;
+		transition: all 0.3s ease;
+	}
+	
+	/* 사이드 패널 토글 버튼 - 모바일에서만 표시 */
+	.sidebar-toggle {
+		display: block;
+		width: calc(100% - 20px);
+        align-items: center;
+        margin: 10px;
+		padding: 12px 16px;
+		background: #2b2d2f;
+		border: 1px solid #3a3d40;
+		border-radius: 8px;
+		color: #fff;
+		font-size: 14px;
+		font-weight: 600;
+		cursor: pointer;
+		text-align: center;
+		transition: all 0.3s ease;
+		position: relative;
+	}
+	
+	.sidebar-toggle:hover {
+		background: #36383A;
+		border-color: #4CAF50;
+	}
+	
+	.sidebar-toggle::after {
+		content: "▼";
+		position: absolute;
+		right: 16px;
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 12px;
+		transition: transform 0.3s ease;
+	}
+	
+	.sidebar-toggle.collapsed::after {
+		transform: translateY(-50%) rotate(-90deg);
+	}
+	
+	/* 사이드 패널 콘텐츠 - 모바일에서 기본적으로 접힌 상태 */
+	.sidebar-content {
+		transition: all 0.3s ease;
+		overflow: hidden;
+		max-height: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+		margin-bottom: 0;
+		opacity: 0;
+	}
+	
+	.sidebar-content.expanded {
+		max-height: none;
+		padding-top: 20px;
+		padding-bottom: 20px;
+		margin-bottom: 20px;
+		opacity: 1;
+	}
+	
+	#content { 
+		width: 100%; 
+		float: none; 
+		order: 2;
+	}
+	
+
+/* 사이드 패널 컴팩트 모드 */
+	#profile, #category, #search_posting_div, #user_count {
+		margin: 8px 5px 12px 5px;
+		padding: 15px;
+		border-radius: 12px;
+	}
 	
 	li.category {
-		padding: 10px;
-		font-size: 1.6ex;
+		padding: 8px 12px;
+		font-size: 1.4ex;
+		margin-bottom: 4px;
+		border-radius: 6px;
 	}
 	
 	li.category-selected {
 		border-left-width: 2px;
+		padding-left: 10px;
 	}
 	
 	li.category-selected::before {
-		left: 6px;
-		font-size: 0.7em;
+		left: 4px;
+		font-size: 0.6em;
 		opacity: 0.8;
 	}
 	
+	/* 검색 UI 모바일 최적화 */
+	.search-container {
+		gap: 8px;
+	}
+	
+	.search-input-group,
+	.search-filter-group {
+		padding: 2px;
+		border-radius: 8px;
+	}
+	
+	#search_posting_text,
+	#search_category_list {
+		padding: 8px 10px;
+		font-size: 14px;
+	}
+	
+	.search-btn {
+		padding: 6px 8px;
+		min-width: 32px;
+		max-width: 32px;
+		height: 32px;
+	}
+	
+	.search-btn svg {
+		width: 12px;
+		height: 12px;
+	}
+	
+	/* 프로필 정보 컴팩트 */
+	#profile {
+		font-size: 1.2ex;
+		text-align: center;
+	}
+	
+	#user_count {
+		font-size: 1.1ex;
+		text-align: center;
+	}
+	
 	.posting_meta {
-		gap: 15px;
-		font-size: 1.8ex;
+		gap: 12px;
+		font-size: 1.6ex;
+		flex-wrap: wrap;
 	}
 	
 	.posting_date {
-		font-size: 1.6ex;
+		font-size: 1.4ex;
 	}
 	
 	.posting_read_count {
-		font-size: 1.4ex;
-		padding: 2px 8px;
+		font-size: 1.2ex;
+		padding: 2px 6px;
 	}
 }
 
@@ -660,4 +811,337 @@ button.page:hover, .page-link:hover {
 button.page:active, .page-link:active {
 	transform: translateY(0);
 	box-shadow: none;
+}
+
+/* Writer 페이지 (게시글 작성) 스타일 */
+#post-writer {
+	margin: 10px 10px 20px 10px;
+	padding: 30px;
+	border-radius: 20px;
+	background: #222426;
+}
+
+.post-form {
+	background: transparent;
+	border-radius: 0;
+	padding: 0;
+	color: #fff;
+}
+
+.form-group {
+	margin-bottom: 24px;
+}
+
+.form-row {
+	display: flex;
+	margin-bottom: 16px;
+}
+
+.form-row .form-group {
+	margin-right: 16px;
+}
+
+.form-row .form-group:last-child {
+	margin-right: 0;
+}
+
+.form-group-half {
+	flex: 1;
+	margin-bottom: 0;
+}
+
+.form-group-title {
+	flex: 3;
+	margin-bottom: 0;
+}
+
+.form-group-category {
+	flex: 1;
+	margin-bottom: 0;
+}
+
+.form-label {
+	display: block;
+	margin-bottom: 8px;
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.form-control {
+	width: 100%;
+	padding: 12px 16px;
+	border: 1px solid #464646;
+	border-radius: 8px;
+	background: #2b2d2f;
+	color: #fff;
+	font-size: 16px;
+	transition: all 0.3s ease;
+	box-sizing: border-box;
+}
+
+.form-control:focus {
+	outline: none;
+	border-color: #4CAF50;
+	box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.25);
+	background: #2f3133;
+}
+
+.form-control::placeholder {
+	color: #9aa0a6;
+	font-weight: 400;
+}
+
+.form-control.error {
+	border-color: #f44336;
+	box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.25);
+}
+
+.textarea-content {
+	min-height: 300px;
+	resize: vertical;
+	font-family: inherit;
+	line-height: 1.6;
+}
+
+.form-help {
+	margin-top: 6px;
+	font-size: 0.9rem;
+	color: #9aa0a6;
+	font-style: italic;
+}
+
+.field-error {
+	margin-top: 6px;
+	font-size: 0.9rem;
+	color: #f44336;
+	font-weight: 500;
+}
+
+.form-actions {
+	margin-top: 32px;
+	padding-top: 0;
+	text-align: right;
+}
+
+.btn-primary {
+	background: #4CAF50;
+	color: #fff;
+	border: 1px solid #4CAF50;
+	padding: 12px 20px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: normal;
+	cursor: pointer;
+	transition: background-color .15s ease, border-color .15s ease;
+	text-decoration: none;
+	display: inline-block;
+	margin-right: 12px;
+	box-sizing: border-box;
+	height: 44px;
+	line-height: 1;
+}
+
+.btn-primary:hover {
+	background: #45a049;
+	border-color: #45a049;
+}
+
+.btn-primary:disabled {
+	background: #6b6b6b;
+	border-color: #6b6b6b;
+	cursor: not-allowed;
+}
+
+.btn-secondary {
+	background: #6c757d;
+	color: #fff;
+	border: 1px solid #6c757d;
+	padding: 12px 20px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: normal;
+	cursor: pointer;
+	transition: background-color .15s ease, border-color .15s ease;
+	text-decoration: none;
+	display: inline-block;
+	margin-right: 12px;
+	box-sizing: border-box;
+	height: 44px;
+	line-height: 1;
+}
+
+.btn-secondary:hover {
+	background: #5a6268;
+	border-color: #5a6268;
+	text-decoration: none;
+	color: #fff;
+}
+
+/* 알림 스타일 */
+.notification {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	padding: 16px 20px;
+	border-radius: 8px;
+	font-weight: 500;
+	z-index: 1000;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	animation: slideIn 0.3s ease;
+}
+
+.notification-error {
+	background: #4a2d2d;
+	color: #f44336;
+	border: 1px solid #f44336;
+}
+
+.notification-success {
+	background: #2d4a2d;
+	color: #4CAF50;
+	border: 1px solid #4CAF50;
+}
+
+.notification-info {
+	background: #2d3a4a;
+	color: #2196F3;
+	border: 1px solid #2196F3;
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+	#post-writer {
+		margin: 5px;
+		padding: 20px;
+	}
+	
+	.form-row {
+		flex-direction: column;
+		gap: 0;
+	}
+	
+	.form-group-title,
+	.form-group-category {
+		margin-bottom: 24px;
+	}
+	
+	.form-control {
+		padding: 10px 12px;
+		font-size: 14px;
+	}
+	
+	.textarea-content {
+		min-height: 250px;
+	}
+	
+	.form-actions {
+		text-align: center;
+	}
+	
+	.btn-primary,
+	.btn-secondary {
+		width: 100%;
+		margin-bottom: 12px;
+		margin-right: 0;
+	}
+	
+	.notification {
+		top: 10px;
+		right: 10px;
+		left: 10px;
+		text-align: center;
+	}
+}
+
+@media (max-width: 480px) {
+	/* 매우 작은 화면 최적화 */
+	#main {
+		padding: 15px 8px;
+		padding-top: 8px;
+	}
+	
+	section {
+		padding: 8px;
+	}
+	
+	#side-panel {
+		margin-bottom: 15px;
+		padding-bottom: 15px;
+	}
+	
+	#profile, #category, #search_posting_div, #user_count {
+		margin: 6px 3px 10px 3px;
+		padding: 12px;
+		border-radius: 10px;
+	}
+	
+	li.category {
+		padding: 6px 10px;
+		font-size: 1.2ex;
+		margin-bottom: 3px;
+	}
+	
+	/* 검색 UI 초소형 최적화 */
+	#search_posting_text,
+	#search_category_list {
+		padding: 6px 8px;
+		font-size: 13px;
+	}
+	
+	.search-btn {
+		padding: 4px 6px;
+		min-width: 28px;
+		max-width: 28px;
+		height: 28px;
+	}
+	
+	.search-btn svg {
+		width: 10px;
+		height: 10px;
+	}
+	
+	/* 에디터 최적화 */
+	#post-writer {
+		margin: 3px;
+		padding: 12px;
+	}
+	
+	.form-label {
+		font-size: 0.9rem;
+	}
+	
+	.form-control {
+		padding: 6px 8px;
+		font-size: 13px;
+	}
+	
+	.textarea-content {
+		min-height: 180px;
+	}
+	
+	.btn-primary,
+	.btn-secondary {
+		padding: 8px 16px;
+		font-size: 13px;
+		height: 36px;
+	}
+}
+
+/* 데스크톱에서는 토글 버튼 숨김 */
+@media (min-width: 1025px) {
+	.sidebar-toggle {
+		display: none !important;
+	}
 }

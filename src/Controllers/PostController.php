@@ -94,10 +94,11 @@ class PostController extends BaseController
         
         $categories = $this->categoryModel->getWriteAll($userLevel);
         
-        $this->renderLayout('main', 'posts/create', [
+        $this->renderLayout('main', 'posts/editor', [
             'categories' => $categories,
             'selectedCategory' => $categoryId > 0 ? $categoryId : null,
-            'csrfToken' => $this->view->csrfToken()
+            'csrfToken' => $this->view->csrfToken(),
+            'isEdit' => false
         ]);
     }
 
@@ -195,10 +196,11 @@ class PostController extends BaseController
 
         $categories = $this->categoryModel->getWriteAll($userLevel);
         
-        $this->renderLayout('main', 'posts/edit', [
+        $this->renderLayout('main', 'posts/editor', [
             'post' => $post,
             'categories' => $categories,
-            'csrfToken' => $this->view->csrfToken()
+            'csrfToken' => $this->view->csrfToken(),
+            'isEdit' => true
         ]);
     }
 
