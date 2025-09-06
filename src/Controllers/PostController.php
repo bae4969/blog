@@ -4,17 +4,20 @@ namespace Blog\Controllers;
 
 use Blog\Models\Post;
 use Blog\Models\Category;
+use Blog\Models\User;
 
 class PostController extends BaseController
 {
     private $postModel;
     private $categoryModel;
+    private $userModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->postModel = new Post();
         $this->categoryModel = new Category();
+        $this->userModel = new User();
     }
 
     public function show(?int $postId = null): void
@@ -40,11 +43,20 @@ class PostController extends BaseController
         // 조회수 증가
         $this->postModel->incrementReadCount($postId);
 
+        // 방문자 수 업데이트
+        $this->userModel->updateVisitorCount();
+
         $categories = $this->categoryModel->getAll($userLevel);
+        $visitorCount = $this->userModel->getVisitorCount();
+        
+        // 현재 포스팅의 카테고리를 currentCategory로 설정
+        $currentCategory = $post['category_index'] ?? null;
         
         $this->renderLayout('main', 'posts/show', [
             'post' => $post,
             'categories' => $categories,
+            'visitorCount' => $visitorCount,
+            'currentCategory' => $currentCategory,
             'csrfToken' => $this->view->csrfToken()
         ]);
     }
@@ -99,14 +111,18 @@ class PostController extends BaseController
         }
 
         $userIndex = $this->auth->getCurrentUserIndex();
+        $userLevel = $this->auth->getCurrentUserLevel();
         
         try {
             $postId = $this->postModel->create([
                 'title' => $title,
                 'content' => $content,
                 'category_index' => $categoryId,
-                'user_index' => $userIndex
+                'user_index' => $userIndex,
+                'user_lebel' => $userLevel
             ]);
+
+            
 
             $this->session->setFlash('success', '게시글이 작성되었습니다.');
             $this->redirect("/reader.php?posting_index={$postId}");
@@ -227,8 +243,8 @@ class PostController extends BaseController
             $this->redirect('/index.php');
         }
 
-        $read_level = $this->auth->getCurrentUserLevel();
-        $post = $this->postModel->getById($read_level, $postId);
+        $userLevel = $this->auth->getCurrentUserLevel();
+        $post = $this->postModel->getById($userLevel, $postId);
         
         if (!$post) {
             $this->session->setFlash('error', '게시글을 찾을 수 없습니다.');

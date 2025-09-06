@@ -20,7 +20,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('category_index')) {
         categoryIndex = parseInt(params.get('category_index'));
+        // 카테고리 선택 상태를 쿠키에 저장
+        setCookie('selectedCategory', categoryIndex.toString(), 24);
+    } else {
+        // URL에 카테고리 파라미터가 없으면 쿠키에서 복원
+        const savedCategory = getCookie('selectedCategory');
+        if (savedCategory) {
+            categoryIndex = parseInt(savedCategory);
+        }
     }
+    
     if (params.get('search_string')) {
         searchString = decodeURIComponent(params.get('search_string'));
     }
@@ -32,6 +41,10 @@ document.addEventListener('DOMContentLoaded', function() {
     verifyLogin();
     initProfile();
     initCategoryList();
+    initSearchEnhancements();
+    
+    // 세션 모니터링 시작
+    startSessionMonitoring();
     
     // 현재 페이지에 따라 다른 초기화
     const currentPath = window.location.pathname;
@@ -82,6 +95,11 @@ function verifyLogin() {
         .then(data => {
             userInfo = data;
             updateLoginStatus();
+            
+            // 세션이 만료된 경우 알림 표시
+            if (data.session_expired) {
+                showSessionExpiredAlert();
+            }
         })
         .catch(error => {
             console.error('로그인 상태 확인 실패:', error);
@@ -124,7 +142,11 @@ function initPostingList() {
 
 // 게시글 상세 초기화
 function initPostingDetail() {
-    // 게시글 상세는 서버에서 렌더링되므로 여기서는 추가 작업 없음
+    // 검색 카테고리 선택 상태 복원
+    const searchCategorySelect = document.getElementById('search_category_list');
+    if (searchCategorySelect && categoryIndex > 0) {
+        searchCategorySelect.value = categoryIndex.toString();
+    }
 }
 
 // 로그인/로그아웃 클릭
@@ -147,15 +169,77 @@ function writePostingClick() {
     }
 }
 
+// 카테고리 선택 함수
+function selectCategory(categoryId) {
+    categoryIndex = categoryId;
+    // 카테고리 선택 상태를 쿠키에 저장
+    setCookie('selectedCategory', categoryIndex.toString(), 24);
+    // 해당 카테고리로 이동
+    location.href = `/index.php${categoryId > 0 ? '?category_index=' + categoryId : ''}`;
+}
+
+// 검색 기능 향상 초기화
+function initSearchEnhancements() {
+    const searchText = document.getElementById('search_posting_text');
+    const searchBtn = document.getElementById('search_posting_btn');
+    
+    if (!searchText) return;
+    
+    // 키보드 단축키 지원 (Ctrl+K 또는 Cmd+K)
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchText.focus();
+            searchText.select();
+        }
+    });
+    
+    // 검색어 입력 시 실시간 힌트 표시
+    searchText.addEventListener('input', function() {
+        const value = this.value.trim();
+        if (value.length > 0) {
+            this.style.borderColor = '#4CAF50';
+        } else {
+            this.style.borderColor = '';
+        }
+    });
+    
+    // 검색 버튼에 툴팁 추가
+    if (searchBtn) {
+        searchBtn.title = '검색 (Enter 또는 Ctrl+K)';
+    }
+    
+    // 검색 입력창에 툴팁 추가
+    searchText.title = '게시글 제목으로 검색 (Ctrl+K로 포커스)';
+}
+
 // 게시글 검색
 function searchPostingClick() {
     const categorySelect = document.getElementById('search_category_list');
     const searchText = document.getElementById('search_posting_text');
+    const searchBtn = document.getElementById('search_posting_btn');
+    const searchInputGroup = document.querySelector('.search-input-group');
     
     if (!categorySelect || !searchText) return;
     
+    // 검색 중 애니메이션 효과
+    if (searchInputGroup) {
+        searchInputGroup.classList.add('searching');
+        searchBtn.style.transform = 'scale(0.95)';
+    }
+    
     const selectedCategory = categorySelect.value;
     const searchValue = searchText.value.trim();
+    
+    // 선택된 카테고리를 전역 변수와 쿠키에 저장
+    categoryIndex = parseInt(selectedCategory);
+    setCookie('selectedCategory', categoryIndex.toString(), 24);
+    
+    // 검색어가 없으면 전체 목록으로 이동
+    if (!searchValue && selectedCategory === '-1') {
+        location.href = '/index.php';
+        return;
+    }
     
     let url = '/index.php?';
     if (selectedCategory !== '-1') {
@@ -165,7 +249,10 @@ function searchPostingClick() {
         url += 'search_string=' + encodeURIComponent(searchValue);
     }
     
-    location.href = url;
+    // 약간의 지연 후 페이지 이동 (애니메이션 효과를 위해)
+    setTimeout(() => {
+        location.href = url;
+    }, 200);
 }
 
 // 게시글 삭제
@@ -302,7 +389,69 @@ window.addEventListener('error', function(e) {
     console.error('JavaScript 에러:', e.error);
 });
 
+// 세션 만료 알림 표시
+function showSessionExpiredAlert() {
+    const alertDiv = document.createElement('div');
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #ff4444;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 10000;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        max-width: 300px;
+    `;
+    alertDiv.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 5px;">세션이 만료되었습니다</div>
+        <div style="margin-bottom: 10px;">자동으로 로그아웃됩니다.</div>
+        <button onclick="this.parentElement.remove()" style="
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        ">확인</button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // 5초 후 자동으로 제거
+    setTimeout(() => {
+        if (alertDiv.parentElement) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// 주기적 세션 상태 확인 (5분마다)
+let sessionCheckInterval = null;
+
+function startSessionMonitoring() {
+    // 이미 실행 중이면 중지
+    if (sessionCheckInterval) {
+        clearInterval(sessionCheckInterval);
+    }
+    
+    // 5분마다 세션 상태 확인
+    sessionCheckInterval = setInterval(() => {
+        verifyLogin();
+    }, 5 * 60 * 1000); // 5분
+}
+
+function stopSessionMonitoring() {
+    if (sessionCheckInterval) {
+        clearInterval(sessionCheckInterval);
+        sessionCheckInterval = null;
+    }
+}
+
 // 페이지 언로드 시 정리
 window.addEventListener('beforeunload', function() {
-    // 필요한 정리 작업
+    stopSessionMonitoring();
 });

@@ -60,12 +60,14 @@ class AuthController extends BaseController
             $this->json([
                 'state' => 0,
                 'can_write' => $canWrite ? 1 : 0,
-                'user_name' => $user['user_id'] ?? ''
+                'user_name' => $user['user_id'] ?? '',
+                'session_expired' => false
             ]);
         } else {
             $this->json([
                 'state' => 1,
-                'etc' => '로그인이 필요합니다.'
+                'etc' => '로그인이 필요합니다.',
+                'session_expired' => $this->session->isExpired()
             ]);
         }
     }

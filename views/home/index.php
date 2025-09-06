@@ -11,11 +11,14 @@
                         <div class="posting_title">
                             <?= $view->escape($post['posting_title']) ?>
                         </div>
-                        <div class="posting_writer">
-                            작성자: <?= $view->escape($post['user_name'] ?? '익명') ?>
-                        </div>
-                        <div class="posting_date">
-                            <?= date('Y-m-d H:i', strtotime($post['posting_first_post_datetime'])) ?>
+                        <div class="post-meta">
+                            <span class="post-category"><?= $view->escape($post['category_name'] ?? '미분류') ?></span>
+                            <span class="post-author"><?= $view->escape($post['user_name'] ?? '익명') ?></span>
+                            <span class="post-date"><?= date('Y-m-d H:i', strtotime($post['posting_first_post_datetime'])) ?></span>
+                            <?php if (isset($post['posting_last_post_datetime']) && $post['posting_last_post_datetime'] !== $post['posting_first_post_datetime']): ?>
+                                <span class="post-updated">(수정: <?= date('Y-m-d H:i', strtotime($post['posting_last_post_datetime'])) ?>)</span>
+                            <?php endif; ?>
+                            <span class="post-read-count">조회: <?= number_format($post['posting_read_cnt'] ?? 0) ?></span>
                         </div>
                         <hr>
                         <div class="posting_thumbnail_container">

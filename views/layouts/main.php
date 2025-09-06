@@ -37,29 +37,40 @@
                 </div>
                 <div id="user_count">방문자: <?= number_format($visitorCount ?? 0) ?></div>
                 <ul id="category">
-                    <li class="category" onclick="location.href='/index.php'">전체</li>
+                    <li class="category <?= (!isset($currentCategory) || $currentCategory === null) ? 'category-selected' : '' ?>" onclick="selectCategory(-1)">전체</li>
                     <?php if (isset($categories)): ?>
                         <?php foreach ($categories as $category): ?>
-                            <li class="category" onclick="location.href='/index.php?category_index=<?= $category['category_index'] ?>'">
+                            <li class="category <?= (isset($currentCategory) && $currentCategory == $category['category_index']) ? 'category-selected' : '' ?>" onclick="selectCategory(<?= $category['category_index'] ?>)">
                                 <?= $view->escape($category['category_name']) ?>
                             </li>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </ul>
                 <div id="search_posting_div">
-                    <select id="search_category_list">
-                        <option value="-1">분류 선택</option>
-                        <?php if (isset($categories)): ?>
-                            <?php foreach ($categories as $category): ?>
-                                <option value="<?= $category['category_index'] ?>">
-                                    <?= $view->escape($category['category_name']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </select>
-                    <button id="search_posting_btn" onclick="searchPostingClick()">검색</button>
-                    <input id="search_posting_text" type="text" placeholder="제목" 
-                           onkeyup="if(window.event.keyCode==13){searchPostingClick()}" />
+                    <div class="search-container">
+                        <div class="search-input-group">
+                            <input id="search_posting_text" type="text" placeholder="검색..." 
+                                   onkeyup="if(window.event.keyCode==13){searchPostingClick()}" />
+                            <button id="search_posting_btn" onclick="searchPostingClick()" class="search-btn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.35-4.35"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="search-filter-group">
+                            <select id="search_category_list">
+                                <option value="-1">전체</option>
+                                <?php if (isset($categories)): ?>
+                                    <?php foreach ($categories as $category): ?>
+                                        <option value="<?= $category['category_index'] ?>">
+                                            <?= $view->escape($category['category_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </aside>
             

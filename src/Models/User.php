@@ -67,13 +67,38 @@ class User
         return $result ? (int)$result['visit_count'] : 0;
     }
 
-    public function updateVisitorCount(): void
+    public function updateVisitorCount(): bool
     {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
         $visitYear = date("Y");
         $visitWeek = date("W");
         $yearWeek = $visitYear . str_pad($visitWeek, 2, '0', STR_PAD_LEFT);
+        $sessionKey = 'visitor_counted_' . $yearWeek;
+        
+        // 오래된 주의 세션 키들 정리 (현재 주가 아닌 것들)
+        if (isset($_SESSION)) {
+            foreach ($_SESSION as $key => $value) {
+                if (strpos($key, 'visitor_counted_') === 0) {
+                    $sessionYearWeek = substr($key, 16); // 'visitor_counted_' 길이만큼 제거
+                    if ($sessionYearWeek !== $yearWeek) {
+                        unset($_SESSION[$key]);
+                    }
+                }
+            }
+        }
+        
+        if (isset($_SESSION[$sessionKey])) {
+            return false;
+        }
         
         $sql = "INSERT INTO weekly_visitors VALUES (?, 1) ON DUPLICATE KEY UPDATE visit_count = visit_count + 1";
         $this->db->query($sql, [$yearWeek]);
+        
+        $_SESSION[$sessionKey] = true;
+        
+        return true;
     }
 }

@@ -40,6 +40,15 @@ class Auth
 
     public function isLoggedIn(): bool
     {
+        // 세션이 만료되었는지 먼저 확인
+        if ($this->session->isExpired()) {
+            $this->logout();
+            return false;
+        }
+        
+        // 세션 활동 시간 업데이트
+        $this->session->updateActivity();
+        
         return $this->session->has('user_index');
     }
 

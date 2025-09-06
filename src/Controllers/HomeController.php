@@ -30,8 +30,7 @@ class HomeController extends BaseController
         // 카테고리 ID가 -1이면 null로 설정
         $categoryId = $categoryId > 0 ? $categoryId : null;
         
-        // 방문자 수 업데이트
-        $this->userModel->updateVisitorCount($userLevel);
+        $this->userModel->updateVisitorCount();
         
         // 데이터 조회
         $posts = $this->postModel->getAll($userLevel, $page, 10, $categoryId, $search);
