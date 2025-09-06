@@ -17,15 +17,11 @@ body {
 }
 
 #main {
-	width: 70%;
+	width: 100%;
 	max-width: 1600px;
 	margin: 0 auto;
-	padding: 20px;
+	padding: 20px 10px;
 	padding-top: 10px;
-}
-
-@media screen and (max-width: 1600px) {
-	#main { width: calc(100% - 40px); }
 }
 
 /* 헤더 */
@@ -629,11 +625,6 @@ footer a:hover { text-decoration: underline; color: #FF2E2E; }
 }
 
 /* 인터랙션: 목록 카드 및 페이지 버튼 호버 효과 */
-.no-posts {
-	width: 100%;
-	margin-top: 50px;
-	text-align: center;
-}
 .post-item, .posting, .posting_ban {
 	transition: background-color .2s ease, box-shadow .2s ease, transform .15s ease;
 	cursor: pointer;

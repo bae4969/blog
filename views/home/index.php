@@ -1,8 +1,8 @@
 <div id="postings">
     <div>
         <?php if (empty($posts)): ?>
-            <div class="no-posts">
-                <p>게시글이 없습니다.</p>
+            <div class="alert alert-info">
+                게시글이 없습니다.
             </div>
         <?php else: ?>
             <div id="left">
