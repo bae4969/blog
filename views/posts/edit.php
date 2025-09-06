@@ -21,9 +21,7 @@
         </div>
         
         <div class="form-group">
-            <textarea id="input_content" name="content" style="width:100%">
-<?= $post['posting_content'] ?>
-            </textarea>
+            <textarea id="input_content" name="content" rows="15" style="width:100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; font-size: 14px; line-height: 1.5;" placeholder="내용을 입력하세요..."><?= $post['posting_content'] ?></textarea>
         </div>
         
         <div class="form-group">
@@ -33,25 +31,7 @@
     </form>
 </div>
 
-<script src="/smarteditor2/js/HuskyEZCreator.js" charset="utf-8"></script>
 <script>
-var oEditors = [];
-
-function initSmartEditor() {
-    if (window.nhn && nhn.husky && nhn.husky.EZCreator && document.getElementById('input_content')) {
-        nhn.husky.EZCreator.createInIFrame({
-            oAppRef: oEditors,
-            elPlaceHolder: "input_content",
-            sSkinURI: "/smarteditor2/SmartEditor2Skin.html",
-            fCreator: "createSEditor2"
-        });
-    } else {
-        setTimeout(initSmartEditor, 60);
-    }
-}
-
-window.addEventListener('load', initSmartEditor);
-
 document.querySelector('.post-form').addEventListener('submit', function(e) {
     e.preventDefault();
     submitClick();
@@ -60,7 +40,7 @@ document.querySelector('.post-form').addEventListener('submit', function(e) {
 function submitClick() {
     const title = document.getElementById("input_title").value.trim();
     const category = document.getElementById("input_category").value;
-    const content = (oEditors[0] && oEditors.getById) ? oEditors.getById["input_content"].getIR() : document.getElementById('input_content').value;
+    const content = document.getElementById("input_content").value.trim();
     
     if (!title) {
         alert('제목을 입력해주세요.');
@@ -72,13 +52,9 @@ function submitClick() {
         return;
     }
     
-    if (!content || content === '<p><br></p>') {
+    if (!content) {
         alert('내용을 입력해주세요.');
         return;
-    }
-
-    if (oEditors.getById) {
-        oEditors.getById["input_content"].exec("UPDATE_CONTENTS_FIELD", []);
     }
 
     document.querySelector('.post-form').submit();
