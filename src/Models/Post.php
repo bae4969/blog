@@ -2,6 +2,8 @@
 
 namespace Blog\Models;
 
+use HTMLPurifier;
+use HTMLPurifier_Config;
 use Blog\Database\Database;
 
 class Post
@@ -41,12 +43,26 @@ class Post
 
         $whereClause = !empty($whereConditions) ? "WHERE " . implode(" AND ", $whereConditions) : "";
 
-        $sql = "SELECT P.*, C.category_name, U.user_id as user_name 
-                FROM posting_list P 
-                LEFT JOIN category_list C ON P.category_index = C.category_index 
-                LEFT JOIN user_list U ON P.user_index = U.user_index 
-                {$whereClause} 
-                ORDER BY P.posting_index DESC 
+        $sql = "SELECT 
+                    P.posting_index,
+                    P.user_index,
+                    P.category_index,
+                    P.posting_state,
+                    P.posting_first_post_datetime,
+                    P.posting_last_edit_datetime,
+                    P.posting_read_cnt,
+                    P.posting_title,
+                    P.posting_thumbnail,
+                    P.posting_summary,
+                    C.category_name,
+                    U.user_id AS user_name
+                FROM posting_list P
+                LEFT JOIN category_list C 
+                    ON P.category_index = C.category_index
+                LEFT JOIN user_list U 
+                    ON P.user_index = U.user_index
+                {$whereClause}
+                ORDER BY P.posting_index DESC
                 LIMIT ? OFFSET ?";
 
         $params[] = $perPage;
@@ -68,17 +84,57 @@ class Post
 
     public function create(array $data): int
     {
-        $sql = "SELECT COUNT(*) as count FROM category_list WHERE category_read_level >= ? AND category_index = ?";
-        $result = $this->db->fetch($sql, [$data['user_lavel'], $data['category_index']]);
-        if ($result == null || $result['count'] < 1)
+        $sql = "SELECT COUNT(*) AS count
+                FROM category_list
+                WHERE category_write_level >= ? AND category_index = ?";
+        $result = $this->db->fetch($sql, [$data['user_level'], $data['category_index']]);
+        if ($result === null || (int)$result['count'] < 1) {
             throw new \Exception("해당 카테고리에 글을 작성할 권한이 없습니다.");
+        }
 
-        $sql = "INSERT INTO posting_list (posting_title, posting_content, category_index, user_index, posting_first_post_datetime) 
-                VALUES (?, ?, ?, ?, NOW())";
-        
+        // Purifier 준비
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('Cache.SerializerPath', __DIR__ . '/cache/htmlpurifier'); // 웹서버 쓰기 가능 경로
+        $config->set('HTML.Allowed', 'p,br,strong,em,ul,ol,li,a[href|title],img[src|alt|title],code,pre,blockquote');
+        $config->set('URI.AllowedSchemes', ['http'=>true,'https'=>true,'data'=>false]); // data: 금지 권장
+        $purifier = new HTMLPurifier($config);
+
+        // 원문
+        $title_raw = (string)($data['title'] ?? '');
+        $content_raw = (string)$data['content'];
+
+        // 첫 이미지 추출은 정제 전 원문 기준으로 시도
+        $thumbnail = null;
+        if (preg_match('/<img[^>]+src=["\']?([^"\'>\s]+)["\']?/i', $content_raw, $m)) {
+            $thumbnail = $m[1];
+        } elseif (preg_match('/!\[[^\]]*\]\(([^)]+)\)/', $content_raw, $m)) {
+            $thumbnail = $m[1];
+        }
+
+        // 제목 정제
+        $title = htmlspecialchars(strip_tags($title_raw), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // 본문 정제
+        $content = $purifier->purify($content_raw);
+
+        // 요약 생성(정제본에서 이미지 제거 후 200자)
+        $tmp = preg_replace('/<img\b[^>]*>/i', '', $content);
+        $tmp = strip_tags($tmp);
+        $tmp = html_entity_decode($tmp, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $tmp = preg_replace('/\s+/u', ' ', trim($tmp));
+        $summary = mb_substr($tmp, 0, 200, 'UTF-8');
+
+        // INSERT
+        $sql = "INSERT INTO posting_list
+                (posting_title, posting_content, posting_summary, posting_thumbnail,
+                category_index, user_index, posting_first_post_datetime)
+                VALUES (?, ?, ?, ?, ?, ?, NOW())";
+
         $this->db->query($sql, [
-            $data['title'],
-            $data['content'],
+            $title,
+            $content,
+            $summary,
+            $thumbnail,
             $data['category_index'],
             $data['user_index']
         ]);

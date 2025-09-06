@@ -82,7 +82,7 @@ class User
         if (isset($_SESSION)) {
             foreach ($_SESSION as $key => $value) {
                 if (strpos($key, 'visitor_counted_') === 0) {
-                    $sessionYearWeek = substr($key, 16); // 'visitor_counted_' 길이만큼 제거
+                    $sessionYearWeek = substr($key, 16);
                     if ($sessionYearWeek !== $yearWeek) {
                         unset($_SESSION[$key]);
                     }

@@ -27,7 +27,7 @@
                             <?php endif; ?>
                         </div>
                         <div class="posting_summary">
-                            <?= $view->escape(substr(strip_tags($post['posting_summary']), 0, 200)) ?>...
+                            <?= $view->escape(substr(strip_tags($post['posting_summary']), 0, 200)) ?> ...
                         </div>
                     </div>
                 <?php endforeach; ?>

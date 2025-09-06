@@ -119,7 +119,7 @@ class PostController extends BaseController
                 'content' => $content,
                 'category_index' => $categoryId,
                 'user_index' => $userIndex,
-                'user_lebel' => $userLevel
+                'user_level' => $userLevel
             ]);
 
             
@@ -132,7 +132,7 @@ class PostController extends BaseController
         }
     }
 
-    public function editForm(int $postId = null): void
+    public function editForm(?int $postId = null): void
     {
         $this->auth->requireLogin();
 
