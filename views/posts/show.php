@@ -20,21 +20,21 @@
         <?php if ($auth->isLoggedIn() && $auth->getCurrentUserIndex() === $post['user_index']): ?>
             <div class="post-actions">
                 <a href="/post/edit/<?= $post['posting_index'] ?>" class="btn btn-edit">수정</a>
-                <button onclick="deletePost(<?= $post['posting_index'] ?>)" class="btn btn-delete">삭제</button>
+                <button onclick="disablePost(<?= $post['posting_index'] ?>)" class="btn btn-disable">삭제</button>
             </div>
         <?php endif; ?>
     </article>
 </div>
 
-<form id="delete-form" method="POST" style="display: none;">
+<form id="disable-form" method="POST" style="display: none;">
     <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
 </form>
 
 <script>
-function deletePost(postId) {
+function disablePost(postId) {
     if (confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
-        const form = document.getElementById('delete-form');
-        form.action = '/post/delete/' + postId;
+        const form = document.getElementById('disable-form');
+        form.action = '/post/disable/' + postId;
         form.submit();
     }
 }

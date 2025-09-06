@@ -18,24 +18,30 @@ class Post
         $offset = ($page - 1) * $perPage;
         $whereConditions = [];
         $params = [];
+        
+
+        $whereConditions[] = "C.category_read_level >= ?";
+        $params[] = $userLevel;
+
+        if($userLevel > 1)
+        {
+            $whereConditions[] = "P.posting_state = ?";
+            $params[] = 0;
+        }
 
         if ($categoryId !== null && $categoryId > 0) {
             $whereConditions[] = "P.category_index = ?";
-            $whereConditions[] = "C.category_read_level >= ?";
             $params[] = $categoryId;
-            $params[] = $userLevel;
         }
 
         if ($search) {
             $whereConditions[] = "P.posting_title LIKE ?";
-            $whereConditions[] = "C.category_read_level >= ?";
             $params[] = "%{$search}%";
-            $params[] = $userLevel;
         }
 
         $whereClause = !empty($whereConditions) ? "WHERE " . implode(" AND ", $whereConditions) : "";
 
-        $sql = "SELECT P.*, C.category_name, U.user_id as user_name, P.posting_read_cnt 
+        $sql = "SELECT P.*, C.category_name, U.user_id as user_name 
                 FROM posting_list P 
                 LEFT JOIN category_list C ON P.category_index = C.category_index 
                 LEFT JOIN user_list U ON P.user_index = U.user_index 
@@ -96,7 +102,7 @@ class Post
         return $stmt->rowCount() > 0;
     }
 
-    public function delete(int $postId): bool
+    public function disable(int $postId): bool
     {
         $sql = "UPDATE posting_list SET posting_state = 1 WHERE posting_index = ?";
         $stmt = $this->db->query($sql, [$postId]);

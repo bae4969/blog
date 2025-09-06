@@ -581,8 +581,8 @@ footer a:hover { text-decoration: underline; color: #FF2E2E; }
 .btn { display:inline-block; padding: 12px 20px; border-radius: 8px; text-decoration:none; cursor:pointer; font-size: 14px; border:1px solid transparent; transition: background-color .15s ease, border-color .15s ease; margin-right: 12px; }
 .btn-edit { background:#3f5e46; color:#fff; border-color:#2a4130; }
 .btn-edit:hover { background:#344e3b; border-color:#233528; }
-.btn-delete { background:#8a3a3a; color:#fff; border-color:#6b2929; margin-right: 0; }
-.btn-delete:hover { background:#7a3030; border-color:#5e2424; }
+.btn-disable { background:#8a3a3a; color:#fff; border-color:#6b2929; margin-right: 0; }
+.btn-disable:hover { background:#7a3030; border-color:#5e2424; }
 
 @media (max-width: 768px) {
 	section { padding: 10px; }
