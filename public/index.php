@@ -34,6 +34,7 @@ $router->get('/writer.php', [PostController::class, 'createForm']);
 $router->post('/writer.php', [PostController::class, 'create']);
 $router->get('/post/edit/:id', [PostController::class, 'editForm', '/post/edit/:id']);
 $router->post('/post/update/:id', [PostController::class, 'update', '/post/update/:id']);
+$router->post('/post/enable/:id', [PostController::class, 'enable', '/post/enable/:id']);
 $router->post('/post/disable/:id', [PostController::class, 'disable', '/post/disable/:id']);
 
 // 요청 처리

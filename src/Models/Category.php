@@ -13,9 +13,15 @@ class Category
         $this->db = Database::getInstance();
     }
 
-    public function getAll(int $userLevel): array
+    public function getReadAll(int $userLevel): array
     {
         $sql = "SELECT * FROM category_list WHERE category_read_level >= ? ORDER BY category_order ASC";
+        return $this->db->fetchAll($sql, [$userLevel]);
+    }
+
+    public function getWriteAll(int $userLevel): array
+    {
+        $sql = "SELECT * FROM category_list WHERE category_write_level >= ? ORDER BY category_order ASC";
         return $this->db->fetchAll($sql, [$userLevel]);
     }
 
@@ -67,15 +73,15 @@ class Category
 
     public function isWriteAuth(int $userLevel, int $categoryId): bool
     {
-        $sql = "SELECT COUNT(*) as count FROM category_list WHERE category_read_level >= ? AND category_index = ?";
-        $result = $this->db->fetch($sql, [$categoryId]);
+        $sql = "SELECT COUNT(*) as count FROM category_list WHERE category_write_level >= ? AND category_index = ?";
+        $result = $this->db->fetch($sql, [$userLevel, $categoryId]);
         return ($result && $result['count'] > 0);
     }
 
     public function isReadAuth(int $userLevel, int $categoryId): bool
     {
-        $sql = "SELECT COUNT(*) as count FROM category_list WHERE category_write_level >= ? AND category_index = ?";
-        $result = $this->db->fetch($sql, [$categoryId]);
+        $sql = "SELECT COUNT(*) as count FROM category_list WHERE category_read_level >= ? AND category_index = ?";
+        $result = $this->db->fetch($sql, [$userLevel, $categoryId]);
         return ($result && $result['count'] > 0);
     }
 }

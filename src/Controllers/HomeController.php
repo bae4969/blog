@@ -33,13 +33,20 @@ class HomeController extends BaseController
         $this->userModel->updateVisitorCount();
         
         // 데이터 조회
-        $posts = $this->postModel->getAll($userLevel, $page, 10, $categoryId, $search);
-        $categories = $this->categoryModel->getAll($userLevel);
+        $posts = $this->postModel->getMetaAll($userLevel, $page, 10, $categoryId, $search);
+        $categories = $this->categoryModel->getReadAll($userLevel);
         $totalCount = $this->postModel->getTotalCount($categoryId, $search);
         $visitorCount = $this->userModel->getVisitorCount();
         
         // 페이지네이션 계산
         $totalPages = ceil($totalCount / 10);
+        
+        // 사용자 게시글 작성 제한 정보
+        $userPostingInfo = null;
+        if ($this->auth->isLoggedIn()) {
+            $userIndex = $this->auth->getCurrentUserIndex();
+            $userPostingInfo = $this->userModel->getPostingLimitInfo($userIndex);
+        }
         
         $data = [
             'posts' => $posts,
@@ -49,6 +56,7 @@ class HomeController extends BaseController
             'currentCategory' => $categoryId,
             'search' => $search,
             'visitorCount' => $visitorCount,
+            'userPostingInfo' => $userPostingInfo,
             'csrfToken' => $this->view->csrfToken()
         ];
         
@@ -63,7 +71,7 @@ class HomeController extends BaseController
         
         $categoryId = $categoryId > 0 ? $categoryId : null;
         
-        $posts = $this->postModel->getAll($userLevel, 1, 10, $categoryId, $search);
+        $posts = $this->postModel->getMetaAll($userLevel, 1, 10, $categoryId, $search);
         $totalCount = $this->postModel->getTotalCount($categoryId, $search);
         
         $this->json([

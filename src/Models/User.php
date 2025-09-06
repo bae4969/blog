@@ -40,14 +40,30 @@ class User
 
     public function canWrite(int $userIndex): bool
     {
-        $sql = "SELECT user_posting_count, user_posting_limit FROM user_list WHERE user_index = ?";
+        $sql = "SELECT user_level FROM user_list WHERE user_index = ?";
         $user = $this->db->fetch($sql, [$userIndex]);
         
         if (!$user) {
             return false;
         }
         
-        return $user['user_posting_count'] < $user['user_posting_limit'];
+        return $user['user_level'] <= 3;
+    }
+
+    public function getPostingLimitInfo(int $userIndex): ?array
+    {
+        $sql = "SELECT user_posting_count, user_posting_limit FROM user_list WHERE user_index = ?";
+        $user = $this->db->fetch($sql, [$userIndex]);
+        
+        if (!$user) {
+            return null;
+        }
+        
+        return [
+            'current_count' => (int)$user['user_posting_count'],
+            'limit' => (int)$user['user_posting_limit'],
+            'is_limited' => $user['user_posting_count'] >= $user['user_posting_limit']
+        ];
     }
 
     public function incrementPostCount(int $userIndex): void

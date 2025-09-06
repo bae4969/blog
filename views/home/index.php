@@ -7,7 +7,7 @@
         <?php else: ?>
             <div id="left">
                 <?php foreach ($posts as $post): ?>
-                    <div class="posting" onclick="location.href='/reader.php?posting_index=<?= $post['posting_index'] ?>'">
+                    <div class="posting <?= $post['posting_state'] != 0 ? 'posting-disabled' : '' ?>" onclick="location.href='/reader.php?posting_index=<?= $post['posting_index'] ?>'">
                         <div class="posting_title">
                             <?= $view->escape($post['posting_title']) ?>
                         </div>

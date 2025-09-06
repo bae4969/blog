@@ -102,6 +102,16 @@
     </div>
 
     <script src="/js/main.js"></script>
+    <script>
+    function writePostingClick() {
+        <?php if (isset($userPostingInfo) && $userPostingInfo && $userPostingInfo['is_limited']): ?>
+            alert('게시글 작성 제한에 도달했습니다. (<?= $userPostingInfo['current_count'] ?>/<?= $userPostingInfo['limit'] ?>)');
+            return;
+        <?php endif; ?>
+        
+        location.href = '/writer.php';
+    }
+    </script>
     <?php if (isset($additionalJs)): ?>
         <?php foreach ($additionalJs as $js): ?>
             <script src="<?= $js ?>"></script>

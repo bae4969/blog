@@ -33,7 +33,7 @@ class PostController extends BaseController
         }
 
         $userLevel = $this->auth->getCurrentUserLevel();
-        $post = $this->postModel->getById($userLevel, $postId);
+        $post = $this->postModel->getDetailById($userLevel, $postId);
 
         if (!$post) {
             $this->session->setFlash('error', '게시글을 찾을 수 없습니다.');
@@ -46,17 +46,30 @@ class PostController extends BaseController
         // 방문자 수 업데이트
         $this->userModel->updateVisitorCount();
 
-        $categories = $this->categoryModel->getAll($userLevel);
+        $categories = $this->categoryModel->getReadAll($userLevel);
         $visitorCount = $this->userModel->getVisitorCount();
         
         // 현재 포스팅의 카테고리를 currentCategory로 설정
         $currentCategory = $post['category_index'] ?? null;
+        
+        // 카테고리 쓰기 권한 확인
+        $canWriteToCategory = $this->categoryModel->isWriteAuth($userLevel, $post['category_index']);
+        
+        // 사용자 게시글 작성 제한 정보
+        $userPostingInfo = null;
+        if ($this->auth->isLoggedIn()) {
+            $userIndex = $this->auth->getCurrentUserIndex();
+            $userPostingInfo = $this->userModel->getPostingLimitInfo($userIndex);
+        }
         
         $this->renderLayout('main', 'posts/show', [
             'post' => $post,
             'categories' => $categories,
             'visitorCount' => $visitorCount,
             'currentCategory' => $currentCategory,
+            'canWriteToCategory' => $canWriteToCategory,
+            'userLevel' => $userLevel,
+            'userPostingInfo' => $userPostingInfo,
             'csrfToken' => $this->view->csrfToken()
         ]);
     }
@@ -67,8 +80,19 @@ class PostController extends BaseController
         
         $categoryId = (int)$this->getParam('category_index', -1);
         $userLevel = $this->auth->getCurrentUserLevel();
+        $userIndex = $this->auth->getCurrentUserIndex();
         
-        $categories = $this->categoryModel->getAll($userLevel);
+        // 사용자의 게시글 작성 제한 확인
+        $userPostingInfo = $this->userModel->getPostingLimitInfo($userIndex);
+        
+        // 제한에 도달한 경우 메시지 표시 후 index로 리다이렉트
+        if ($userPostingInfo && $userPostingInfo['is_limited']) {
+            $this->session->setFlash('error', '게시글 작성 제한에 도달했습니다. (' . $userPostingInfo['current_count'] . '/' . $userPostingInfo['limit'] . ')');
+            $this->redirect('/index.php');
+            return;
+        }
+        
+        $categories = $this->categoryModel->getWriteAll($userLevel);
         
         $this->renderLayout('main', 'posts/create', [
             'categories' => $categories,
@@ -88,6 +112,16 @@ class PostController extends BaseController
         if (!$this->validateCsrfToken()) {
             $this->session->setFlash('error', '보안 토큰이 유효하지 않습니다.');
             $this->redirect('/writer.php');
+        }
+
+        // 사용자의 게시글 작성 제한 확인
+        $userIndex = $this->auth->getCurrentUserIndex();
+        $userPostingInfo = $this->userModel->getPostingLimitInfo($userIndex);
+        
+        if ($userPostingInfo && $userPostingInfo['is_limited']) {
+            $this->session->setFlash('error', '게시글 작성 제한에 도달했습니다. (' . $userPostingInfo['current_count'] . '/' . $userPostingInfo['limit'] . ')');
+            $this->redirect('/index.php');
+            return;
         }
 
         $title = $this->sanitizeInput($this->getParam('title', ''));
@@ -146,7 +180,7 @@ class PostController extends BaseController
         }
         
         $userLevel = $this->auth->getCurrentUserLevel();
-        $post = $this->postModel->getById($userLevel, $postId);
+        $post = $this->postModel->getDetailById($userLevel, $postId);
         
         if (!$post) {
             $this->session->setFlash('error', '게시글을 찾을 수 없습니다.');
@@ -159,7 +193,7 @@ class PostController extends BaseController
             $this->redirect('/index.php');
         }
 
-        $categories = $this->categoryModel->getAll($userLevel);
+        $categories = $this->categoryModel->getWriteAll($userLevel);
         
         $this->renderLayout('main', 'posts/edit', [
             'post' => $post,
@@ -182,7 +216,7 @@ class PostController extends BaseController
         }
 
         $userLevel = $this->auth->getCurrentUserLevel();
-        $post = $this->postModel->getById($userLevel, $postId);
+        $post = $this->postModel->getDetailById($userLevel, $postId);
         
         if (!$post) {
             $this->session->setFlash('error', '게시글을 찾을 수 없습니다.');
@@ -193,6 +227,15 @@ class PostController extends BaseController
         if ($post['user_index'] !== $currentUserIndex) {
             $this->session->setFlash('error', '수정 권한이 없습니다.');
             $this->redirect('/index.php');
+        }
+
+        // 사용자의 게시글 작성 제한 확인 (수정은 제한에 영향받지 않지만 일관성을 위해)
+        $userPostingInfo = $this->userModel->getPostingLimitInfo($currentUserIndex);
+        
+        if ($userPostingInfo && $userPostingInfo['is_limited']) {
+            $this->session->setFlash('error', '게시글 작성 제한에 도달했습니다. (' . $userPostingInfo['current_count'] . '/' . $userPostingInfo['limit'] . ')');
+            $this->redirect('/index.php');
+            return;
         }
 
         $title = $this->sanitizeInput($this->getParam('title', ''));
@@ -230,6 +273,43 @@ class PostController extends BaseController
         }
     }
 
+    public function enable(int $postId): void
+    {
+        $this->auth->requireLogin();
+
+        if (!$this->isPost()) {
+            $this->redirect('/index.php');
+        }
+
+        if (!$this->validateCsrfToken()) {
+            $this->session->setFlash('error', '보안 토큰이 유효하지 않습니다.');
+            $this->redirect('/index.php');
+        }
+
+        $userLevel = $this->auth->getCurrentUserLevel();
+        $post = $this->postModel->getDetailById($userLevel, $postId);
+        
+        if (!$post) {
+            $this->session->setFlash('error', '게시글을 찾을 수 없습니다.');
+            $this->redirect('/index.php');
+        }
+
+        $currentUserIndex = $this->auth->getCurrentUserIndex();
+        if ($post['user_index'] !== $currentUserIndex) {
+            $this->session->setFlash('error', '복구 권한이 없습니다.');
+            $this->redirect('/index.php');
+        }
+
+        try {
+            $this->postModel->enable($postId);
+            $this->session->setFlash('success', '게시글이 복구되었습니다.');
+        } catch (\Exception $e) {
+            $this->session->setFlash('error', '게시글 복구 중 오류가 발생했습니다.');
+        }
+
+        $this->redirect('/index.php');
+    }
+
     public function disable(int $postId): void
     {
         $this->auth->requireLogin();
@@ -244,7 +324,7 @@ class PostController extends BaseController
         }
 
         $userLevel = $this->auth->getCurrentUserLevel();
-        $post = $this->postModel->getById($userLevel, $postId);
+        $post = $this->postModel->getDetailById($userLevel, $postId);
         
         if (!$post) {
             $this->session->setFlash('error', '게시글을 찾을 수 없습니다.');
@@ -252,7 +332,11 @@ class PostController extends BaseController
         }
 
         $currentUserIndex = $this->auth->getCurrentUserIndex();
-        if ($post['user_index'] !== $currentUserIndex) {
+        
+        // 게시글 작성자이거나 카테고리 쓰기 권한이 있는 경우에만 삭제 가능
+        $canDelete = ($post['user_index'] === $currentUserIndex) || $this->categoryModel->isWriteAuth($userLevel, $post['category_index']);
+        
+        if (!$canDelete) {
             $this->session->setFlash('error', '삭제 권한이 없습니다.');
             $this->redirect('/index.php');
         }

@@ -1,4 +1,4 @@
-<div id="post-detail" class="post-wrapper">
+<div id="post-detail" class="post-wrapper <?= $post['posting_state'] != 0 ? 'post-wrapper-disabled' : '' ?>">
     <article class="post">
         <header class="post-header">
             <h1 class="post-title"><?= $view->escape($post['posting_title']) ?></h1>
@@ -17,16 +17,30 @@
             <?= $post['posting_content'] ?>
         </div>
         
-        <?php if ($auth->isLoggedIn() && $auth->getCurrentUserIndex() === $post['user_index']): ?>
-            <div class="post-actions">
-                <a href="/post/edit/<?= $post['posting_index'] ?>" class="btn btn-edit">수정</a>
-                <button onclick="disablePost(<?= $post['posting_index'] ?>)" class="btn btn-disable">삭제</button>
-            </div>
-        <?php endif; ?>
+        <div class="post-actions">
+            <?php if ($auth->isLoggedIn()): ?>
+                <?php if ($post['posting_state'] == 0): ?>
+                    <?php if ($auth->getCurrentUserIndex() === $post['user_index']): ?>
+                        <a href="/post/edit/<?= $post['posting_index'] ?>" class="btn btn-edit">수정</a>
+                    <?php endif; ?>
+                    <?php if ($canWriteToCategory): ?>
+                        <button onclick="disablePost(<?= $post['posting_index'] ?>)" class="btn btn-disable">삭제</button>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <?php if ($canWriteToCategory && $userLevel <= 1): ?>
+                        <button onclick="enablePost(<?= $post['posting_index'] ?>)" class="btn btn-enable">복구</button>
+                    <?php endif; ?>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
     </article>
 </div>
 
 <form id="disable-form" method="POST" style="display: none;">
+    <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+</form>
+
+<form id="enable-form" method="POST" style="display: none;">
     <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
 </form>
 
@@ -35,6 +49,14 @@ function disablePost(postId) {
     if (confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
         const form = document.getElementById('disable-form');
         form.action = '/post/disable/' + postId;
+        form.submit();
+    }
+}
+
+function enablePost(postId) {
+    if (confirm('정말로 이 게시글을 복구하시겠습니까?')) {
+        const form = document.getElementById('enable-form');
+        form.action = '/post/enable/' + postId;
         form.submit();
     }
 }

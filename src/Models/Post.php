@@ -15,7 +15,7 @@ class Post
         $this->db = Database::getInstance();
     }
 
-    public function getAll(int $userLevel, int $page = 1, int $perPage = 10, ?int $categoryId = null, ?string $search = null): array
+    public function getMetaAll(int $userLevel, int $page = 1, int $perPage = 10, ?int $categoryId = null, ?string $search = null): array
     {
         $offset = ($page - 1) * $perPage;
         $whereConditions = [];
@@ -71,7 +71,7 @@ class Post
         return $this->db->fetchAll($sql, $params);
     }
 
-    public function getById(int $userLevel, int $postId): ?array
+    public function getDetailById(int $userLevel, int $postId): ?array
     {
         $sql = "SELECT P.*, C.category_name, U.user_id as user_name 
                 FROM posting_list P 
@@ -94,7 +94,7 @@ class Post
 
         // Purifier 준비
         $config = HTMLPurifier_Config::createDefault();
-        $config->set('Cache.SerializerPath', __DIR__ . '/cache/htmlpurifier'); // 웹서버 쓰기 가능 경로
+        $config->set('Cache.SerializerPath', __DIR__ . '/../../cache/htmlpurifier'); // 웹서버 쓰기 가능 경로
         $config->set('HTML.Allowed', 'p,br,strong,em,ul,ol,li,a[href|title],img[src|alt|title],code,pre,blockquote');
         $config->set('URI.AllowedSchemes', ['http'=>true,'https'=>true,'data'=>false]); // data: 금지 권장
         $purifier = new HTMLPurifier($config);
@@ -104,7 +104,7 @@ class Post
         $content_raw = (string)$data['content'];
 
         // 첫 이미지 추출은 정제 전 원문 기준으로 시도
-        $thumbnail = null;
+        $thumbnail = '';
         if (preg_match('/<img[^>]+src=["\']?([^"\'>\s]+)["\']?/i', $content_raw, $m)) {
             $thumbnail = $m[1];
         } elseif (preg_match('/!\[[^\]]*\]\(([^)]+)\)/', $content_raw, $m)) {
@@ -158,6 +158,13 @@ class Post
         return $stmt->rowCount() > 0;
     }
 
+    public function enable(int $postId): bool
+    {
+        $sql = "UPDATE posting_list SET posting_state = 0 WHERE posting_index = ?";
+        $stmt = $this->db->query($sql, [$postId]);
+        return $stmt->rowCount() > 0;
+    }
+    
     public function disable(int $postId): bool
     {
         $sql = "UPDATE posting_list SET posting_state = 1 WHERE posting_index = ?";
