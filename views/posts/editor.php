@@ -1,7 +1,7 @@
 <div id="post-writer" class="post-wrapper">
     <article class="post">
         <div class="post-content">
-            <form method="POST" action="<?= $isEdit ? '/post/update/' . $post['posting_index'] : '/writer.php' ?>" class="post-form" novalidate>
+            <form id="post-form" method="POST" action="<?= $isEdit ? '/post/update/' . $post['posting_index'] : '/writer.php' ?>" class="post-form" novalidate>
                 <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
                 
                 <div class="form-row">
@@ -31,15 +31,16 @@
                     <div id="quill-editor" class="quill-container"></div>
                     <textarea id="input_content" name="content" style="display: none;"><?= $isEdit ? $post['posting_content'] : '' ?></textarea>
                 </div>
-                
-                <div class="form-actions">
-                    <button id="btn_submit" type="submit" class="btn btn-primary">
-                        <span class="btn-text"><?= $isEdit ? '수정' : '작성' ?></span>
-                        <span class="btn-loading" style="display: none;"><?= $isEdit ? '수정 중...' : '작성 중...' ?></span>
-                    </button>
-                    <button type="button" onclick="handleCancel()" class="btn btn-secondary">취소</button>
-                </div>
             </form>
+        </div>
+        
+        <div class="form-actions">
+            <button id="btn_submit" type="submit" form="post-form" class="btn btn-primary">
+                <span class="btn-text"><?= $isEdit ? '수정' : '작성' ?></span>
+                <span class="btn-loading" style="display: none;"><?= $isEdit ? '수정 중...' : '작성 중...' ?></span>
+            </button>
+            <button type="button" onclick="handleCancel()" class="btn btn-secondary">취소</button>
+        </div>
         </div>
     </article>
 </div>
@@ -60,15 +61,63 @@ document.addEventListener('DOMContentLoaded', function() {
         theme: 'snow',
         placeholder: '내용을 입력하세요...',
         modules: {
-            toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                ['link', 'image'],
-                ['blockquote', 'code-block'],
-                ['clean']
-            ]
+            toolbar: {
+                container: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['blockquote', 'code-block'],
+                    ['divider'],
+                    ['clean']
+                ],
+                handlers: {
+                    'divider': function() {
+                        const range = quill.getSelection();
+                        if (range) {
+                            quill.insertText(range.index, '\n---\n');
+                            quill.setSelection(range.index + 5);
+                        }
+                    },
+                    'image': function() {
+                        const input = document.createElement('input');
+                        input.setAttribute('type', 'file');
+                        input.setAttribute('accept', 'image/*');
+                        input.click();
+
+                        input.onchange = function() {
+                            const file = input.files[0];
+                            if (file) {
+                                // 파일 크기 제한 (5MB)
+                                if (file.size > 5 * 1024 * 1024) {
+                                    alert('이미지 크기는 5MB 이하여야 합니다.');
+                                    return;
+                                }
+
+                                // 로딩 상태 표시
+                                const range = quill.getSelection();
+                                if (range) {
+                                    quill.insertText(range.index, '이미지 처리 중...');
+                                    quill.setSelection(range.index, range.index + 8);
+                                }
+
+                                // 이미지 압축 및 리사이즈
+                                compressImage(file, function(compressedDataUrl) {
+                                    // 로딩 텍스트 제거
+                                    if (range) {
+                                        quill.deleteText(range.index, 8);
+                                        
+                                        // 압축된 이미지 삽입
+                                        quill.insertEmbed(range.index, 'image', compressedDataUrl);
+                                        quill.setSelection(range.index + 1);
+                                    }
+                                });
+                            }
+                        };
+                    }
+                }
+            }
         }
     });
 
@@ -80,9 +129,158 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 초기 내용 저장
     initialContent = quill.root.innerHTML;
+    
+    // --- 텍스트를 구분선으로 변환하는 함수
+    function convertDashesToDivider() {
+        const editor = quill.root;
+        const paragraphs = editor.querySelectorAll('p');
+        
+        paragraphs.forEach(p => {
+            if (p.textContent.trim() === '---') {
+                p.innerHTML = '';
+                p.style.cssText = `
+                    margin: 20px 0;
+                    height: 2px;
+                    background: linear-gradient(to right, transparent, #36383A, transparent);
+                    border: none;
+                    padding: 0;
+                    position: relative;
+                `;
+            }
+        });
+    }
+    
+    // 초기 로드 시에도 구분선 변환
+    convertDashesToDivider();
+
+    // 클립보드 붙여넣기 이벤트 처리
+    quill.root.addEventListener('paste', function(e) {
+
+        input.onchange = function() {
+            const file = input.files[0];
+            if (file) {
+                // 파일 크기 제한 (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('이미지 크기는 5MB 이하여야 합니다.');
+                    return;
+                }
+
+                // 로딩 상태 표시
+                const range = quill.getSelection();
+                if (range) {
+                    quill.insertText(range.index, '이미지 처리 중...');
+                    quill.setSelection(range.index, range.index + 8);
+                }
+
+                // 이미지 압축 및 리사이즈
+                compressImage(file, function(compressedDataUrl) {
+                    // 로딩 텍스트 제거
+                    quill.deleteText(range.index, 8);
+                    
+                    // 압축된 이미지 삽입
+                    quill.insertEmbed(range.index, 'image', compressedDataUrl);
+                    quill.setSelection(range.index + 1);
+                });
+            }
+        };
+    });
+
+    // 클립보드 붙여넣기 이벤트 처리
+    quill.root.addEventListener('paste', function(e) {
+        const clipboardItems = e.clipboardData.items;
+        
+        for (let i = 0; i < clipboardItems.length; i++) {
+            const item = clipboardItems[i];
+            
+            // 이미지 파일인 경우
+            if (item.type.indexOf('image') !== -1) {
+                e.preventDefault(); // 기본 붙여넣기 방지
+                
+                const file = item.getAsFile();
+                if (file) {
+                    // 파일 크기 제한 (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('이미지 크기는 5MB 이하여야 합니다.');
+                        return;
+                    }
+
+                    // 로딩 상태 표시
+                    const range = quill.getSelection();
+                    if (range) {
+                        quill.insertText(range.index, '이미지 처리 중...');
+                        quill.setSelection(range.index, range.index + 8);
+                    }
+
+                    // 이미지 압축 및 리사이즈
+                    compressImage(file, function(compressedDataUrl) {
+                        // 로딩 텍스트 제거
+                        if (range) {
+                            quill.deleteText(range.index, 8);
+                            
+                            // 압축된 이미지 삽입
+                            quill.insertEmbed(range.index, 'image', compressedDataUrl);
+                            quill.setSelection(range.index + 1);
+                        }
+                    });
+                }
+                break; // 이미지 처리 후 루프 종료
+            }
+        }
+    });
+
+    // 드래그 앤 드롭 이벤트 처리
+    quill.root.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    quill.root.addEventListener('dragenter', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    quill.root.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const files = e.dataTransfer.files;
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            // 이미지 파일인 경우
+            if (file.type.indexOf('image') !== -1) {
+                // 파일 크기 제한 (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('이미지 크기는 5MB 이하여야 합니다.');
+                    continue;
+                }
+
+                // 로딩 상태 표시
+                const range = quill.getSelection();
+                if (range) {
+                    quill.insertText(range.index, '이미지 처리 중...');
+                    quill.setSelection(range.index, range.index + 8);
+                }
+
+                // 이미지 압축 및 리사이즈
+                compressImage(file, function(compressedDataUrl) {
+                    // 로딩 텍스트 제거
+                    if (range) {
+                        quill.deleteText(range.index, 8);
+                        
+                        // 압축된 이미지 삽입
+                        quill.insertEmbed(range.index, 'image', compressedDataUrl);
+                        quill.setSelection(range.index + 1);
+                    }
+                });
+            }
+        }
+    });
 
     // Quill 내용 변경 시 hidden textarea 업데이트 및 변경 상태 추적
     quill.on('text-change', function() {
+        convertDashesToDivider(); // 구분선 변환 추가
         document.getElementById('input_content').value = quill.root.innerHTML;
         validateContent();
         
@@ -310,6 +508,46 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
+// 이미지 압축 함수
+function compressImage(file, callback) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    
+    img.onload = function() {
+        // 최대 크기 설정 (1200px)
+        const maxWidth = 1200;
+        const maxHeight = 1200;
+        
+        let { width, height } = img;
+        
+        // 비율 유지하면서 리사이즈
+        if (width > height) {
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+        } else {
+            if (height > maxHeight) {
+                width = (width * maxHeight) / height;
+                height = maxHeight;
+            }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // 이미지 그리기
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // 압축된 이미지를 Data URL로 변환 (품질 80%)
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        callback(compressedDataUrl);
+    };
+    
+    img.src = URL.createObjectURL(file);
+}
+
 // 공통 함수들
 function loginoutClick() {
     <?php if ($auth->isLoggedIn()): ?>
@@ -381,6 +619,72 @@ const quillDarkTheme = `
         font-size: 0.875rem;
         margin-top: 5px;
     }
+    
+    /* 구분선 스타일 */
+    .ql-editor hr {
+        border: none;
+        border-top: 2px solid #36383A;
+        margin: 20px 0;
+        background: none;
+    }
+    
+    .ql-editor hr::before {
+        content: '';
+        display: block;
+        height: 1px;
+        background: linear-gradient(to right, transparent, #36383A, transparent);
+        margin-top: 1px;
+    }
+    
+    /* 구분선 버튼 아이콘 */
+    .ql-toolbar .ql-divider::before {
+        content: '';
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C3C3C3' stroke-width='2'%3E%3Cline x1='3' y1='12' x2='21' y2='12'%3E%3C/line%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    
+    /* --- 텍스트를 구분선으로 변환 */
+    .ql-editor p {
+        margin: 0;
+    }
+    
+    /* --- 만 포함된 단락을 구분선으로 변환 */
+    .ql-editor p:empty {
+        margin: 20px 0;
+        height: 2px;
+        background: linear-gradient(to right, transparent, #36383A, transparent);
+        border: none;
+        padding: 0;
+    }
+    
+    /* --- 텍스트가 있는 단락을 구분선으로 변환 */
+    .ql-editor p:contains("---") {
+        text-align: center;
+        margin: 20px 0;
+        font-size: 0;
+        line-height: 0;
+        height: 0;
+        padding: 0;
+        position: relative;
+    }
+    
+    .ql-editor p:contains("---")::before {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(to right, transparent, #36383A, transparent);
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+    }
+    
     </style>
 `;
 

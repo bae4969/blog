@@ -417,7 +417,7 @@ li.category-selected::before {
 .posting_thumbnail { max-width: 90%; max-height: 400px; padding-bottom: 10px; }
 .posting_summary, .post-excerpt { width: 94%; padding: 0 10px 10px 10px; font-size: 2ex; line-height: 200%; word-break: break-all; }
 
-/* 포스팅 내용 내 이미지 반응형 처리 */
+/* 포스팅 내용 내 이미지 반응형 처리 - 성능 최적화 */
 .post-content img {
     max-width: 100%;
     height: auto;
@@ -425,6 +425,8 @@ li.category-selected::before {
     margin: 20px auto;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    loading: lazy;  /* 지연 로딩 */
+    image-rendering: -webkit-optimize-contrast;  /* 이미지 렌더링 최적화 */
 }
 
 
@@ -496,12 +498,22 @@ footer a:hover { text-decoration: underline; color: #FF2E2E; }
 .post-wrapper { margin: 10px 10px 20px 10px; padding: 30px; border-radius: 20px; background: #222426; }
 .post-wrapper-disabled { background: #4a2d2d; opacity: 0.8; }
 .post { background: transparent; border-radius: 0; padding: 0; color: #fff; }
-.post-header { border: none; padding: 0; margin: 0 0 30px 0; }
+.post-header { 
+    border: none; 
+    padding: 0; 
+    margin: 0 0 30px 0; 
+    border-bottom: 2px solid #36383A; 
+    padding-bottom: 20px; 
+}
+.post-meta { 
+    margin-top: 15px; 
+}
+
 .post-content { 
     background: transparent; 
     border: none; 
     border-radius: 0; 
-    padding: 0px 20px 20px 20px; 
+    padding: 25px 20px 20px 20px; 
     line-height: 1.8; 
     font-size: 2ex; 
     margin-bottom: 30px; 
@@ -522,8 +534,6 @@ footer a:hover { text-decoration: underline; color: #FF2E2E; }
 	color: #ffffff;
 	background: transparent;
 	padding: 20px 30px;
-	border-radius: 12px;
-	border: 1px solid #3a3d40;
 }
 
 /* 메타 정보를 우측 정렬 */

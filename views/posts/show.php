@@ -16,24 +16,24 @@
         <div class="post-content">
             <?= $post['posting_content'] ?>
         </div>
-        
-        <div class="post-actions">
-            <?php if ($auth->isLoggedIn()): ?>
-                <?php if ($post['posting_state'] == 0): ?>
-                    <?php if ($auth->getCurrentUserIndex() === $post['user_index']): ?>
-                        <a href="/post/edit/<?= $post['posting_index'] ?>" class="btn btn-edit">수정</a>
-                    <?php endif; ?>
-                    <?php if ($canWriteToCategory): ?>
-                        <button onclick="disablePost(<?= $post['posting_index'] ?>)" class="btn btn-disable">삭제</button>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <?php if ($canWriteToCategory && $userLevel <= 1): ?>
-                        <button onclick="enablePost(<?= $post['posting_index'] ?>)" class="btn btn-enable">복구</button>
-                    <?php endif; ?>
+    </article>
+    
+    <div class="post-actions">
+        <?php if ($auth->isLoggedIn()): ?>
+            <?php if ($post['posting_state'] == 0): ?>
+                <?php if ($auth->getCurrentUserIndex() === $post['user_index']): ?>
+                    <a href="/post/edit/<?= $post['posting_index'] ?>" class="btn btn-edit">수정</a>
+                <?php endif; ?>
+                <?php if ($canWriteToCategory): ?>
+                    <button onclick="disablePost(<?= $post['posting_index'] ?>)" class="btn btn-disable">삭제</button>
+                <?php endif; ?>
+            <?php else: ?>
+                <?php if ($canWriteToCategory && $userLevel <= 1): ?>
+                    <button onclick="enablePost(<?= $post['posting_index'] ?>)" class="btn btn-enable">복구</button>
                 <?php endif; ?>
             <?php endif; ?>
-        </div>
-    </article>
+        <?php endif; ?>
+    </div>
 </div>
 
 <form id="disable-form" method="POST" style="display: none;">
