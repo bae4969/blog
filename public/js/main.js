@@ -185,9 +185,9 @@ function initSearchEnhancements() {
     
     if (!searchText) return;
     
-    // 키보드 단축키 지원 (Ctrl+K 또는 Cmd+K)
+    // 키보드 단축키 지원 (Ctrl+S 또는 Cmd+S)
     document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
             e.preventDefault();
             searchText.focus();
             searchText.select();
@@ -206,11 +206,11 @@ function initSearchEnhancements() {
     
     // 검색 버튼에 툴팁 추가
     if (searchBtn) {
-        searchBtn.title = '검색 (Enter 또는 Ctrl+K)';
+        searchBtn.title = '검색 (Enter 또는 Ctrl+S)';
     }
     
     // 검색 입력창에 툴팁 추가
-    searchText.title = '게시글 제목으로 검색 (Ctrl+K로 포커스)';
+    searchText.title = '게시글 제목으로 검색 (Ctrl+S로 포커스)';
 }
 
 // 게시글 검색
